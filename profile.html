@@ -130,6 +130,14 @@
                         <i class="fas fa-chevron-right"></i>
                     </div>
 
+                    <div class="action-card" onclick="window.location.href='my_campaigns.html'">
+                        <div class="action-left">
+                            <div class="action-icon" style="background: rgba(28, 200, 138, 0.1); color: #1cc88a;"><i class="fas fa-list-alt"></i></div>
+                            <div class="action-text">My Campaigns</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+
                     <div class="action-card" style="cursor: default;">
                         <div class="action-left">
                             <div class="action-icon icon-yellow"><i class="fas fa-wallet"></i></div>
@@ -241,7 +249,7 @@
                         }
 
                         document.getElementById('bal').innerText = data.coins || 0;
-                        document.getElementById('prof-coins').innerHTML = `${data.coins || 0}`;
+                        document.getElementById('prof-coins').innerHTML = `${data.coins || 0} <i class="fas fa-coins" style="font-size: 14px; color: #f6c23e;"></i>`;
                         document.getElementById('prof-surfed').innerText = data.totalSurfed || 0;
                     }
                 });
