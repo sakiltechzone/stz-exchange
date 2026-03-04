@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login & Register | STZ Exchange</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        /* --- Premium Light Theme Variables --- */
+        :root {
+            --primary-blue: #4a6cfa;
+            --primary-hover: #3855d6;
+            --bg-body: #f4f6fa;
+            --bg-white: #ffffff;
+            --text-main: #4a4a4a;
+            --text-dark: #2c2c2c;
+            --border-color: #e0e6ed;
+        }
+
+        body { 
+            margin: 0; padding: 0; 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100dvh; /* Changed to 100dvh for better mobile handling */
+            overflow-x: hidden;
+        }
+
+        /* --- Auth Container --- */
+        .auth-container {
+            background: var(--bg-white);
+            width: 100%; max-width: 420px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+            overflow: hidden; 
+            margin: 20px;
+        }
+
+        /* --- Blue Header Area --- */
+        .auth-header {
+            background: var(--primary-blue);
+            padding: 25px 20px;
+            text-align: center;
+            color: #fff;
+        }
+        .auth-brand {
+            font-size: 24px; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .auth-brand i { font-size: 26px; color: #fff; background: linear-gradient(135deg, #ff4d4d, #ff8c00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        /* --- Form Area --- */
+        .auth-body { padding: 25px 25px; }
+
+        /* Custom Alert Error Box */
+        .error-msg {
+            color: #ef4444;
+            font-size: 13px;
+            margin-bottom: 15px;
+            display: none;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            text-align: center;
+            font-weight: 500;
+        }
+
+        /* --- Custom Inputs (Thinner for Mobile) --- */
+        .input-group { margin-bottom: 15px; }
+        
+        .input-wrapper {
+            display: flex; align-items: center;
+            border: 1.5px solid var(--primary-blue);
+            border-radius: 25px;
+            overflow: hidden;
+            background: var(--bg-white);
+            transition: 0.3s;
+        }
+        
+        .input-icon {
+            background: var(--primary-blue);
+            color: #fff;
+            width: 42px; height: 42px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+        }
+
+        .auth-input, .auth-select {
+            border: none; padding: 0 15px; height: 42px;
+            flex: 1; font-size: 14px; color: var(--text-dark);
+            outline: none; font-family: 'Inter', sans-serif;
+            background: transparent; width: 100%;
+        }
+        .auth-input::placeholder { color: #888; }
+        .auth-select { cursor: pointer; appearance: none; }
+
+        .full-blue-btn {
+            width: 100%; background: var(--primary-blue); color: #fff;
+            border: none; border-radius: 25px; height: 42px; font-size: 14px; font-weight: 600;
+            cursor: pointer; text-align: left; padding: 0 20px; margin-bottom: 15px;
+            font-family: 'Inter', sans-serif; appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat; background-position: right 15px center;
+        }
+        .full-blue-btn option { background: var(--bg-white); color: var(--text-dark); }
+
+        /* --- Checkbox & Radio --- */
+        .check-group { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 15px; color: var(--text-dark); font-weight: 500;}
+        .check-group input[type="checkbox"] { width: 15px; height: 15px; cursor: pointer; accent-color: var(--primary-blue); }
+
+        .radio-group { display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 600; margin-bottom: 15px; color: var(--text-dark); }
+        .radio-item { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        .radio-item input[type="radio"] { width: 15px; height: 15px; accent-color: var(--primary-blue); cursor: pointer; }
+
+        /* --- Text Links --- */
+        .forgot-pass { text-align: right; font-size: 12px; font-weight: 700; color: var(--primary-blue); margin-bottom: 15px; margin-top: -8px; cursor: pointer; transition: 0.3s; }
+        .forgot-pass:hover { text-decoration: underline; color: var(--primary-hover); }
+
+        .toggle-text { margin-top: 20px; font-size: 13px; color: var(--text-main); text-align: center; }
+        .toggle-text span { color: var(--text-dark); cursor: pointer; font-weight: 700; text-decoration: underline; }
+
+        /* --- Submit Button --- */
+        .primary-btn {
+            width: 100%; height: 45px;
+            background: var(--primary-blue);
+            border: none; border-radius: 25px;
+            color: #fff; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+        .primary-btn:hover { background: var(--primary-hover); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(74, 108, 250, 0.3); }
+
+        #signup-form { display: none; }
+    </style>
+</head>
+<body>
+
+    <div id="maintenance-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-body); z-index: 999999; flex-direction: column; justify-content: center; align-items: center; text-align: center; font-family: 'Inter', sans-serif;">
+        <i class="fas fa-tools" style="font-size: 50px; color: #e74a3b; margin-bottom: 15px;"></i>
+        <h2 style="color: var(--text-dark); margin: 0; font-size: 22px;">Website is under maintenance</h2>
+    </div>
+
+    <div class="auth-container" id="main-auth-container">
+        
+        <div class="auth-header">
+            <div class="auth-brand">
+                <i class="fas fa-play"></i> STZ Exchange
+            </div>
+        </div>
+
+        <div class="auth-body">
+            
+            <div id="login-form">
+                
+                <div class="error-msg" id="error-message">
+                    <i class="fas fa-exclamation-circle"></i> <span id="error-text"></span>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon"><i class="fas fa-envelope-open-text"></i></div>
+                        <input type="email" id="login-email" class="auth-input" placeholder="Enter email">
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon"><i class="fas fa-key"></i></div>
+                        <input type="password" id="login-password" class="auth-input" placeholder="Enter password">
+                    </div>
+                </div>
+
+                <div class="forgot-pass" onclick="resetPassword()">Forgot password?</div>
+
+                <div class="radio-group">
+                    <span>Login as</span>
+                    <label class="radio-item"><input type="radio" name="login_type" value="publisher" checked> Publisher</label>
+                    <label class="radio-item"><input type="radio" name="login_type" value="advertiser"> Advertiser</label>
+                </div>
+
+                <div class="check-group">
+                    <input type="checkbox" id="keep-logged">
+                    <label for="keep-logged">Keep me logged in for 7 days</label>
+                </div>
+
+                <button class="primary-btn" id="login-btn" onclick="loginUser()">Sign In</button>
+                
+                <div class="toggle-text">Don't have an account? <span onclick="toggleForm('signup')">Sign up</span></div>
+            </div>
+
+
+            <div id="signup-form">
+                
+                <div class="error-msg" id="signup-error-message">
+                    <i class="fas fa-exclamation-circle"></i> <span id="signup-error-text"></span>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon"><i class="far fa-user"></i></div>
+                        <input type="text" id="signup-name" class="auth-input" placeholder="Enter Your username">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon"><i class="fas fa-envelope-open-text"></i></div>
+                        <input type="email" id="signup-email" class="auth-input" placeholder="Enter Email">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon"><i class="fas fa-key"></i></div>
+                        <input type="password" id="signup-password" class="auth-input" placeholder="Enter password">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon" style="background: #1cc88a;"><i class="fas fa-gift"></i></div>
+                        <input type="text" id="signup-referral" class="auth-input" placeholder="Referral Code (Optional)" style="border-color: #1cc88a;">
+                    </div>
+                </div>
+
+                <select id="signup-gender" class="full-blue-btn">
+                    <option value="" disabled selected hidden>Gender</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                </select>
+
+                <select id="signup-country" class="full-blue-btn">
+                    <option value="" disabled selected hidden>Country</option>
+                    <option value="india">India</option>
+                    <option value="bangladesh">Bangladesh</option>
+                    <option value="other">Other</option>
+                </select>
+
+                <div class="check-group" style="align-items: flex-start; line-height: 1.4; color: #666; font-weight: 400;">
+                    <input type="checkbox" id="terms-check" style="margin-top: 3px;">
+                    <label for="terms-check">By clicking Sign Up, you agree to our Terms of Service and Privacy Policy</label>
+                </div>
+
+                <button class="primary-btn" id="signup-btn" onclick="registerUser()">Sign Up</button>
+                
+                <div class="toggle-text">Already have an account? <span onclick="toggleForm('login')">Sign In</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // 🌟 Initialize Telegram Web App 🌟
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Expands the app to full height inside Telegram
+        tg.ready();  // Informs Telegram that the Mini App is ready to be displayed
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 🌟 LIVE MAINTENANCE MODE CHECKER 🌟
+        db.ref('settings/maintenanceMode').on('value', snapshot => {
+            if (snapshot.exists() && snapshot.val() === 'on') {
+                document.getElementById('maintenance-screen').style.display = 'flex';
+                document.getElementById('main-auth-container').style.display = 'none'; // Hide login form
+            } else {
+                document.getElementById('maintenance-screen').style.display = 'none';
+                document.getElementById('main-auth-container').style.display = 'block'; // Show login form
+            }
+        });
+
+        function toggleForm(type) {
+            document.getElementById('error-message').style.display = 'none';
+            document.getElementById('signup-error-message').style.display = 'none';
+            
+            if(type === 'signup') {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('signup-form').style.display = 'block';
+            } else {
+                document.getElementById('signup-form').style.display = 'none';
+                document.getElementById('login-form').style.display = 'block';
+            }
+        }
+
+        function resetPassword() {
+            const email = document.getElementById('login-email').value.trim();
+            if(!email) {
+                alert("⚠ Please enter your email address first.");
+                return;
+            }
+
+            auth.sendPasswordResetEmail(email)
+            .then(() => {
+                alert("✅ Please check your inbox");
+            })
+            .catch((error) => {
+                alert("Error: " + error.message);
+            });
+        }
+
+        function registerUser() {
+            const name = document.getElementById('signup-name').value.trim();
+            const email = document.getElementById('signup-email').value.trim().toLowerCase();
+            const password = document.getElementById('signup-password').value;
+            const referral = document.getElementById('signup-referral').value.trim();
+            const gender = document.getElementById('signup-gender').value;
+            const country = document.getElementById('signup-country').value;
+            const termsChecked = document.getElementById('terms-check').checked;
+            
+            const errorBox = document.getElementById('signup-error-message');
+            const errorText = document.getElementById('signup-error-text');
+
+            errorBox.style.display = 'none';
+
+            if(!name || !email || !password || !gender || !country) {
+                errorText.innerText = "Please fill all fields!"; 
+                errorBox.style.display = 'block';
+                return;
+            }
+            if(!termsChecked) {
+                errorText.innerText = "Please accept the Terms of Service."; 
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            // 🌟 Anti-Temp Mail Security Logic 🌟
+            if (!email.includes('@')) {
+                errorText.innerText = "Please enter a valid email address.";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            const emailDomain = email.split('@')[1];
+            // আপনি চাইলে এখানে আরও রিয়েল ডোমেইন যোগ করতে পারবেন
+            const allowedDomains = ['gmail.com', 'yahoo.com', 'outlook.com', 'hotmail.com', 'icloud.com', 'ymail.com'];
+
+            if(!allowedDomains.includes(emailDomain)) {
+                errorText.innerText = "Error: Temp mails are strictly prohibited! Please use a valid email (Gmail, Yahoo, Outlook, etc.).";
+                errorBox.style.display = 'block';
+                return;
+            }
+            // 🌟 End Anti-Temp Mail Logic 🌟
+
+            const btn = document.getElementById('signup-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            btn.disabled = true;
+
+            auth.createUserWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                userCredential.user.sendEmailVerification()
+                .then(() => {
+                    db.ref('users/' + userCredential.user.uid).set({
+                        fullName: name,
+                        email: email,
+                        gender: gender,
+                        country: country,
+                        referredBy: referral || "None",
+                        coins: 50, 
+                        role: 'user', 
+                        createdAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+
+                    alert("✅ Registration Successful! Please check your inbox to verify your email.");
+                    auth.signOut(); 
+                    toggleForm('login');
+                    btn.innerHTML = 'Sign Up';
+                    btn.disabled = false;
+                });
+            })
+            .catch((error) => { 
+                btn.innerHTML = 'Sign Up';
+                btn.disabled = false;
+                
+                if(error.code === 'auth/email-already-in-use') {
+                    errorText.innerText = "Email already registered!";
+                } else if(error.code === 'auth/weak-password') {
+                    errorText.innerText = "Password must be at least 6 characters.";
+                } else {
+                    errorText.innerText = "Registration failed. Try again.";
+                }
+                errorBox.style.display = 'block';
+            });
+        }
+
+        function loginUser() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const loginType = document.querySelector('input[name="login_type"]:checked').value; 
+            
+            const errorBox = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+
+            errorBox.style.display = 'none';
+
+            if(!email || !password) {
+                errorText.innerText = "Please enter email and password.";
+                errorBox.style.display = 'block';
+                return;
+            }
+
+            const btn = document.getElementById('login-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+            btn.disabled = true;
+
+            auth.signInWithEmailAndPassword(email, password)
+            .then((userCredential) => {
+                if(userCredential.user.emailVerified) {
+                    localStorage.setItem('stz_user_login', 'true');
+                    window.location.href = "dashboard.html"; 
+                } else {
+                    errorText.innerText = "Please verify your email address first!";
+                    errorBox.style.display = 'block';
+                    auth.signOut();
+                    btn.innerHTML = 'Sign In';
+                    btn.disabled = false;
+                }
+            })
+            .catch((error) => { 
+                btn.innerHTML = 'Sign In';
+                btn.disabled = false;
+                
+                // Professional Error Messages
+                if (error.code === 'auth/invalid-login-credentials' || 
+                    error.code === 'auth/wrong-password' || 
+                    error.code === 'auth/user-not-found' || 
+                    error.code === 'auth/invalid-credential') {
+                    errorText.innerText = "Incorrect email or password.";
+                } else if (error.code === 'auth/too-many-requests') {
+                    errorText.innerText = "Too many failed attempts. Try again later.";
+                } else {
+                    errorText.innerText = "Login failed. Please try again.";
+                }
+                errorBox.style.display = 'block';
+            });
+        }
+
+        // Custom Auth Check for Users only
+        auth.onAuthStateChanged((user) => {
+            if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
+                window.location.href = "dashboard.html";
+            }
+        });
+    </script>
+</body>
+</html>

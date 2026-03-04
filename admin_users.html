@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users | Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #2c3e50;
+            --primary-blue: #4e73df;
+            --primary-hover: #2e59d9;
+            --bg-body: #f4f6fa;
+            --bg-white: #ffffff;
+            --text-main: #5a5c69;
+            --text-dark: #3a3b45;
+            --text-light: #b7b9cc;
+            --border-color: #eaecf4;
+            --danger: #e74a3b;
+            --success: #1cc88a;
+            --warning: #f6c23e;
+            --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- ADMIN SIDEBAR --- */
+        .sidebar { width: 260px; background: var(--primary-dark); display: flex; flex-direction: column; height: 100vh; position: fixed; transition: 0.3s; z-index: 1000; color: #fff; box-shadow: 2px 0 15px rgba(0,0,0,0.1);}
+        .sidebar-brand { height: 70px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-brand i { color: var(--warning); font-size: 24px; margin-right: 10px; }
+        
+        .nav-menu { padding: 15px; display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto;}
+        .menu-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin: 15px 0 5px 10px; letter-spacing: 1px; }
+
+        .nav-item { padding: 12px 15px; color: rgba(255,255,255,0.7); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 500; transition: all 0.2s;}
+        .nav-item i.main-icon { font-size: 16px; width: 20px; text-align: center; transition: 0.2s; }
+        
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .nav-item.active { background: var(--primary-blue); color: #fff; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); }
+
+        /* --- Main Content Area --- */
+        .main-content { margin-left: 260px; flex: 1; display: flex; flex-direction: column; width: calc(100% - 260px); }
+
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 10; border-bottom: 1px solid var(--border-color);}
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; font-size: 20px; color: var(--text-main); cursor: pointer; padding: 8px; border-radius: 5px; }
+        
+        .admin-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text-dark); background: rgba(78, 115, 223, 0.1); padding: 6px 15px; border-radius: 20px; border: 1px solid rgba(78, 115, 223, 0.2);}
+        .admin-profile i { font-size: 20px; color: var(--primary-blue); }
+
+        /* --- Dashboard Body --- */
+        .dashboard-body { padding: 30px; overflow-y: auto; flex: 1; }
+        
+        /* Search Header */
+        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 15px;}
+        .page-title-box h2 { font-size: 24px; font-weight: 700; color: var(--text-dark); margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px; }
+        .page-title-box p { color: var(--text-main); font-size: 14px; margin: 0; }
+        
+        .search-box { display: flex; align-items: center; background: var(--bg-white); border: 1.5px solid var(--border-color); border-radius: 25px; padding: 5px 15px; width: 100%; max-width: 350px; transition: 0.3s;}
+        .search-box:focus-within { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1); }
+        .search-box i { color: var(--text-light); font-size: 16px; margin-right: 10px; }
+        .search-box input { border: none; outline: none; background: transparent; padding: 8px 0; width: 100%; font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--text-dark);}
+
+        /* Users Grid */
+        .users-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        
+        .user-card { background: var(--bg-white); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 15px; transition: 0.3s; position: relative; overflow: hidden; animation: fadeIn 0.4s ease-out;}
+        .user-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); border-color: var(--primary-blue);}
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .user-header { display: flex; align-items: center; gap: 15px; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px;}
+        .user-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--border-color); object-fit: cover;}
+        .user-info-text { flex: 1; overflow: hidden; }
+        .user-name { font-size: 16px; font-weight: 700; color: var(--text-dark); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .user-email { font-size: 12px; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .user-stats { display: flex; justify-content: space-between; align-items: center; background: rgba(246, 194, 62, 0.05); padding: 12px; border-radius: 8px; border: 1px dashed rgba(246, 194, 62, 0.4); }
+        .stat-item { display: flex; flex-direction: column; }
+        .stat-label { font-size: 11px; font-weight: 600; color: var(--text-light); text-transform: uppercase; margin-bottom: 3px;}
+        .stat-val { font-size: 18px; font-weight: 700; color: var(--warning); display: flex; align-items: center; gap: 5px;}
+
+        .user-uid { font-family: monospace; font-size: 11px; color: var(--primary-blue); background: rgba(78, 115, 223, 0.1); padding: 4px 8px; border-radius: 4px; display: inline-block; word-break: break-all;}
+
+        /* ðŸŒŸ NEW SHADOW BOX FOR ROLE ðŸŒŸ */
+        .role-badge {
+            background: var(--bg-white);
+            color: var(--primary-blue);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
+            text-transform: capitalize;
+        }
+
+        .card-actions { display: flex; gap: 10px; margin-top: auto; }
+        .btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.3s; border: none; display: flex; justify-content: center; align-items: center; gap: 5px; font-family: 'Poppins', sans-serif;}
+        .btn-edit { background: rgba(78, 115, 223, 0.1); color: var(--primary-blue); }
+        .btn-edit:hover { background: var(--primary-blue); color: #fff; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);}
+        .btn-delete { background: rgba(231, 74, 59, 0.1); color: var(--danger); }
+        .btn-delete:hover { background: var(--danger); color: #fff; box-shadow: 0 4px 10px rgba(231, 74, 59, 0.3);}
+
+        /* Empty State */
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-main); grid-column: 1 / -1; }
+        .empty-state i { font-size: 50px; color: var(--border-color); margin-bottom: 15px; }
+
+        /* --- BALANCE EDIT MODAL --- */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-box { background: var(--bg-white); width: 90%; max-width: 400px; border-radius: 15px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); transform: scale(0.9); transition: 0.3s; animation: popIn 0.3s forwards; position: relative;}
+        @keyframes popIn { to { transform: scale(1); } }
+        
+        .close-modal { position: absolute; top: 15px; right: 15px; font-size: 20px; color: var(--text-light); cursor: pointer; transition: 0.3s; }
+        .close-modal:hover { color: var(--danger); transform: rotate(90deg); }
+
+        .modal-title { margin: 0 0 5px 0; font-size: 20px; font-weight: 700; color: var(--text-dark); text-align: center;}
+        .modal-subtitle { text-align: center; color: var(--primary-blue); font-weight: 600; font-size: 14px; margin-bottom: 25px; }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+        .coin-input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; font-weight: 700; color: var(--text-dark); outline: none; font-family: 'Poppins', sans-serif; box-sizing: border-box;}
+        .coin-input:focus { border-color: var(--warning); box-shadow: 0 0 0 3px rgba(246, 194, 62, 0.2); }
+
+        .modal-actions { display: flex; gap: 10px; }
+        .btn-add-coins { background: var(--success); color: #fff; flex: 1; }
+        .btn-add-coins:hover { background: #13855c; }
+        .btn-deduct-coins { background: var(--danger); color: #fff; flex: 1; }
+        .btn-deduct-coins:hover { background: #c0392b; }
+
+        /* Mobile Overlay */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; width: 100%; }
+            .menu-toggle { display: block; }
+            .sidebar-overlay.active { display: block; }
+            .dashboard-body { padding: 20px 15px; }
+            .users-grid { grid-template-columns: 1fr; }
+            .search-box { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="modal-overlay" id="balance-modal">
+        <div class="modal-box">
+            <i class="fas fa-times close-modal" onclick="closeModal()"></i>
+            <div style="text-align: center; margin-bottom: 15px;">
+                <i class="fas fa-wallet" style="font-size: 40px; color: var(--warning);"></i>
+            </div>
+            <h3 class="modal-title">Modify Balance</h3>
+            <p class="modal-subtitle" id="modal-user-name">User Name</p>
+
+            <div class="input-group">
+                <label>Enter Amount of Coins</label>
+                <input type="number" id="coin-amount" class="coin-input" placeholder="e.g. 500" min="1">
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-add-coins" onclick="updateBalance('add')"><i class="fas fa-arrow-up"></i> Add Coins</button>
+                <button class="btn btn-deduct-coins" onclick="updateBalance('deduct')"><i class="fas fa-arrow-down"></i> Deduct</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand"><i class="fas fa-user-shield"></i> Admin Panel</div>
+        
+        <div class="nav-menu">
+            <div class="menu-label">CORE</div>
+            <div class="nav-item" onclick="window.location.href='admin_dashboard.html'"><i class="fas fa-tachometer-alt main-icon"></i> <span>Dashboard</span></div>
+            
+            <div class="menu-label">MANAGEMENT</div>
+            <div class="nav-item" onclick="window.location.href='admin_pending.html'"><i class="fas fa-clock main-icon"></i> <span>Pending Requests</span></div>
+            <div class="nav-item" onclick="window.location.href='admin_active.html'"><i class="fas fa-check-circle main-icon"></i> <span>Active Campaigns</span></div>
+            <div class="nav-item active" onclick="window.location.href='admin_users.html'"><i class="fas fa-users main-icon"></i> <span>Manage Users</span></div>
+            
+            <div class="menu-label">FINANCE & SETTINGS</div>
+            <div class="nav-item" onclick="window.location.href='admin_coins.html'"><i class="fas fa-hand-holding-usd main-icon"></i> <span>Add/Deduct Coins</span></div>
+            <div class="nav-item" onclick="window.location.href='admin_settings.html'"><i class="fas fa-cogs main-icon"></i> <span>App Settings</span></div>
+            
+            <div class="nav-item" onclick="logoutAdmin()" style="margin-top: 20px; color: #ff6b6b;"><i class="fas fa-sign-out-alt main-icon"></i> <span>Logout</span></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <div class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+            </div>
+            <div class="admin-profile">
+                <span>Admin</span>
+                <i class="fas fa-user-circle"></i>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            
+            <div class="page-header">
+                <div class="page-title-box">
+                    <h2><i class="fas fa-users" style="color: var(--primary-blue);"></i> User Directory</h2>
+                    <p>Manage all registered users, edit balances, or remove accounts.</p>
+                </div>
+                
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="search-input" placeholder="Search by name or email..." onkeyup="filterUsers()">
+                </div>
+            </div>
+
+            <div class="users-grid" id="users-container">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin" style="color: var(--primary-blue);"></i>
+                    <h3>Loading Users...</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('mobile-overlay').classList.toggle('active');
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let allUsers = [];
+        let currentEditUid = null;
+
+        // ðŸŒŸ ADMIN SECURE AUTH CHECK ðŸŒŸ
+        auth.onAuthStateChanged(user => {
+            if (user && localStorage.getItem('stz_admin_login') === 'true') {
+                loadAllUsers();
+            } else { 
+                window.location.href="admin_login.html"; 
+            }
+        });
+
+        function logoutAdmin() {
+            localStorage.removeItem('stz_admin_login');
+            auth.signOut().then(() => { 
+                window.location.href = "admin_login.html"; 
+            });
+        }
+
+        // --- Fetch & Display Users ---
+        function loadAllUsers() {
+            db.ref('users').on('value', snapshot => {
+                allUsers = [];
+                snapshot.forEach(child => {
+                    allUsers.push({ uid: child.key, ...child.val() });
+                });
+                
+                // Sort by creation date (Newest first) if timestamp exists, else reverse
+                allUsers.reverse(); 
+                renderUsers(allUsers);
+            });
+        }
+
+        function renderUsers(usersArray) {
+            const container = document.getElementById('users-container');
+            container.innerHTML = '';
+
+            if (usersArray.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-users-slash"></i>
+                        <h3>No Users Found</h3>
+                    </div>`;
+                return;
+            }
+
+            usersArray.forEach(user => {
+                const name = user.fullName || "Unknown User";
+                const email = user.email || "No Email";
+                const coins = user.coins || 0;
+                const role = user.role || 'User';
+                const avatar = user.profileImage || `https://ui-avatars.com/api/?name=${name}&background=4e73df&color=fff`;
+
+                const card = `
+                    <div class="user-card" id="user-${user.uid}">
+                        <div class="user-header">
+                            <img src="${avatar}" class="user-avatar" alt="User">
+                            <div class="user-info-text">
+                                <h4 class="user-name">${name}</h4>
+                                <p class="user-email">${email}</p>
+                            </div>
+                        </div>
+
+                        <div class="user-uid"><i class="fas fa-fingerprint"></i> ${user.uid}</div>
+
+                        <div class="user-stats">
+                            <div class="stat-item">
+                                <span class="stat-label">Balance</span>
+                                <span class="stat-val"><i class="fas fa-coins"></i> ${coins}</span>
+                            </div>
+                            
+                            <div class="stat-item" style="align-items: flex-end;">
+                                <span class="stat-label">Role</span>
+                                <div class="role-badge"><i class="fas fa-user-tag"></i> ${role}</div>
+                            </div>
+                        </div>
+
+                        <div class="card-actions">
+                            <button class="btn btn-edit" onclick="openModal('${user.uid}', '${name}')"><i class="fas fa-edit"></i> Edit Balance</button>
+                            <button class="btn btn-delete" onclick="deleteUser('${user.uid}', '${name}')"><i class="fas fa-trash-alt"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += card;
+            });
+        }
+
+        // --- Live Search Filter ---
+        function filterUsers() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allUsers.filter(user => {
+                const nameMatch = (user.fullName || "").toLowerCase().includes(query);
+                const emailMatch = (user.email || "").toLowerCase().includes(query);
+                return nameMatch || emailMatch;
+            });
+            renderUsers(filtered);
+        }
+
+        // --- Balance Modal Logic ---
+        function openModal(uid, name) {
+            currentEditUid = uid;
+            document.getElementById('modal-user-name').innerText = "Target: " + name;
+            document.getElementById('coin-amount').value = '';
+            document.getElementById('balance-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('balance-modal').style.display = 'none';
+            currentEditUid = null;
+        }
+
+        function updateBalance(actionType) {
+            const amountInput = document.getElementById('coin-amount').value;
+            const amount = parseInt(amountInput);
+
+            if (!amount || amount <= 0 || isNaN(amount)) {
+                alert("Please enter a valid coin amount!");
+                return;
+            }
+
+            if(confirm(`Are you sure you want to ${actionType.toUpperCase()} ${amount} coins for this user?`)) {
+                db.ref('users/' + currentEditUid + '/coins').transaction(currentCoins => {
+                    let newBal = currentCoins || 0;
+                    if(actionType === 'add') {
+                        newBal += amount;
+                    } else if (actionType === 'deduct') {
+                        newBal -= amount;
+                        if(newBal < 0) newBal = 0; // Prevent negative balance
+                    }
+                    return newBal;
+                }).then(() => {
+                    closeModal();
+                    alert(`âœ… Balance updated successfully!`);
+                }).catch(err => alert("Error: " + err.message));
+            }
+        }
+
+        // --- Delete User Logic ---
+        function deleteUser(uid, name) {
+            if(confirm(`WARNING: Are you absolutely sure you want to delete the user "${name}"?\n\nThis action cannot be undone and will permanently remove their data from the database.`)) {
+                
+                // Delete user from Database
+                db.ref('users/' + uid).remove().then(() => {
+                    alert(`User "${name}" has been permanently deleted.`);
+                }).catch(err => alert("Error deleting user: " + err.message));
+            }
+        }
+    </script>
+</body>
+</html>

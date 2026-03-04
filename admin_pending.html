@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Requests | Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #2c3e50;
+            --primary-blue: #4e73df;
+            --primary-hover: #2e59d9;
+            --bg-body: #f4f6fa;
+            --bg-white: #ffffff;
+            --text-main: #5a5c69;
+            --text-dark: #3a3b45;
+            --text-light: #b7b9cc;
+            --border-color: #eaecf4;
+            --danger: #e74a3b;
+            --success: #1cc88a;
+            --warning: #f6c23e;
+            --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- ADMIN SIDEBAR --- */
+        .sidebar { width: 260px; background: var(--primary-dark); display: flex; flex-direction: column; height: 100vh; position: fixed; transition: 0.3s; z-index: 1000; color: #fff; box-shadow: 2px 0 15px rgba(0,0,0,0.1);}
+        .sidebar-brand { height: 70px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-brand i { color: var(--warning); font-size: 24px; margin-right: 10px; }
+        
+        .nav-menu { padding: 15px; display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto;}
+        .menu-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin: 15px 0 5px 10px; letter-spacing: 1px; }
+
+        .nav-item { padding: 12px 15px; color: rgba(255,255,255,0.7); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 500; transition: all 0.2s;}
+        .nav-item i.main-icon { font-size: 16px; width: 20px; text-align: center; transition: 0.2s; }
+        
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .nav-item.active { background: var(--primary-blue); color: #fff; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); }
+
+        /* --- Main Content Area --- */
+        .main-content { margin-left: 260px; flex: 1; display: flex; flex-direction: column; width: calc(100% - 260px); }
+
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 10; border-bottom: 1px solid var(--border-color);}
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; font-size: 20px; color: var(--text-main); cursor: pointer; padding: 8px; border-radius: 5px; }
+        
+        .admin-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text-dark); background: rgba(78, 115, 223, 0.1); padding: 6px 15px; border-radius: 20px; border: 1px solid rgba(78, 115, 223, 0.2);}
+        .admin-profile i { font-size: 20px; color: var(--primary-blue); }
+
+        /* --- Dashboard Body --- */
+        .dashboard-body { padding: 30px; overflow-y: auto; flex: 1; }
+        .page-title { font-size: 24px; font-weight: 700; color: var(--text-dark); margin-top: 0; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
+        .page-subtitle { color: var(--text-main); font-size: 14px; margin-bottom: 25px; }
+
+        /* Pending Cards Grid */
+        .pending-list { display: flex; flex-direction: column; gap: 20px; }
+        
+        .req-card { 
+            background: var(--bg-white); 
+            border: 1px solid var(--border-color); 
+            border-left: 5px solid var(--warning); 
+            border-radius: 12px; 
+            padding: 25px; 
+            box-shadow: var(--shadow-sm); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px; 
+            transition: all 0.3s ease; 
+            animation: fadeIn 0.4s ease-out;
+        }
+        .req-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); border-color: rgba(246, 194, 62, 0.4); }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Card Header */
+        .req-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px;}
+        .req-title-box { display: flex; flex-direction: column; gap: 5px;}
+        .req-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0; line-height: 1.3; }
+        
+        .badge { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(246, 194, 62, 0.1); color: #d9a323; border: 1px solid rgba(246, 194, 62, 0.3); display: flex; align-items: center; gap: 6px; height: fit-content;}
+
+        /* 🌟 NEW: Campaign Description Box 🌟 */
+        .req-desc-box {
+            background: #f9fafe;
+            border-left: 3px solid var(--primary-blue);
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            color: var(--text-main);
+            line-height: 1.5;
+            margin-top: -5px;
+        }
+        .req-desc-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary-blue);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Card Info Grid */
+        .req-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        
+        .info-item { display: flex; align-items: center; gap: 12px; background: var(--bg-body); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);}
+        .info-icon { width: 35px; height: 35px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; background: var(--bg-white); box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+        .info-text { display: flex; flex-direction: column; }
+        .info-label { font-size: 11px; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 2px;}
+        .info-value { font-size: 14px; color: var(--text-dark); font-weight: 600; }
+
+        /* User ID Box */
+        .user-id-box { 
+            font-family: monospace; 
+            font-size: 13px; 
+            color: var(--text-main); 
+            background: rgba(78, 115, 223, 0.05); 
+            padding: 10px 15px;
+            border-radius: 6px; 
+            border: 1px dashed var(--primary-blue); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 5px;
+            word-wrap: break-word; 
+            overflow-wrap: break-word; 
+            word-break: break-all;
+        }
+        
+        @media (min-width: 500px) {
+            .user-id-box {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                gap: 15px;
+            }
+        }
+        
+        .user-id-box span { color: var(--primary-blue); font-weight: 600; }
+
+        /* Action Buttons */
+        .req-actions { display: flex; gap: 15px; align-items: center; margin-top: 5px;}
+        
+        .btn { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; font-family: 'Poppins', sans-serif;}
+        
+        .btn-view { background: var(--bg-body); color: var(--primary-blue); border: 1px solid var(--border-color); }
+        .btn-view:hover { background: var(--primary-blue); color: #fff; border-color: var(--primary-blue); box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3);}
+        
+        .btn-approve { background: var(--success); color: #fff; box-shadow: 0 4px 10px rgba(28, 200, 138, 0.2);}
+        .btn-approve:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(28, 200, 138, 0.4); }
+        
+        .btn-reject { background: var(--danger); color: #fff; box-shadow: 0 4px 10px rgba(231, 74, 59, 0.2);}
+        .btn-reject:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(231, 74, 59, 0.4); }
+
+        .empty-state { text-align: center; padding: 60px 20px; color: var(--text-main); background: var(--bg-white); border-radius: 15px; border: 1px dashed var(--border-color);}
+        .empty-state i { font-size: 60px; color: var(--success); margin-bottom: 20px; opacity: 0.8;}
+
+        /* Mobile Overlay */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; width: 100%; }
+            .menu-toggle { display: block; }
+            .overlay.active { display: block; }
+            .dashboard-body { padding: 20px 15px; }
+            
+            .req-header { flex-direction: column; gap: 15px; }
+            .badge { align-self: flex-start; }
+            .req-actions { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand"><i class="fas fa-user-shield"></i> Admin Panel</div>
+        
+        <div class="nav-menu">
+            <div class="menu-label">CORE</div>
+            <div class="nav-item" onclick="window.location.href='admin_dashboard.html'"><i class="fas fa-tachometer-alt main-icon"></i> <span>Dashboard</span></div>
+            
+            <div class="menu-label">MANAGEMENT</div>
+            <div class="nav-item active" onclick="window.location.href='admin_pending.html'"><i class="fas fa-clock main-icon"></i> <span>Pending Requests</span></div>
+            <div class="nav-item" onclick="window.location.href='admin_active.html'"><i class="fas fa-check-circle main-icon"></i> <span>Active Campaigns</span></div>
+            <div class="nav-item" onclick="window.location.href='admin_users.html'"><i class="fas fa-users main-icon"></i> <span>Manage Users</span></div>
+            
+            <div class="menu-label">FINANCE & SETTINGS</div>
+            <div class="nav-item" onclick="window.location.href='admin_coins.html'"><i class="fas fa-hand-holding-usd main-icon"></i> <span>Add/Deduct Coins</span></div>
+            <div class="nav-item" onclick="window.location.href='admin_settings.html'"><i class="fas fa-cogs main-icon"></i> <span>App Settings</span></div>
+            
+            <div class="nav-item" onclick="logoutAdmin()" style="margin-top: 20px; color: #ff6b6b;"><i class="fas fa-sign-out-alt main-icon"></i> <span>Logout</span></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <div class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+            </div>
+            <div class="admin-profile">
+                <span>Admin</span>
+                <i class="fas fa-user-circle"></i>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            
+            <h2 class="page-title"><i class="fas fa-hourglass-half" style="color: var(--warning);"></i> Pending Campaigns</h2>
+            <p class="page-subtitle">Carefully review the submitted links and instructions before approving them to the live server.</p>
+
+            <div class="pending-list" id="pending-list">
+                <div class="empty-state">
+                    <i class="fas fa-spinner fa-spin" style="color: var(--primary-blue);"></i>
+                    <h3>Loading requests...</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('mobile-overlay').classList.toggle('active');
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 🌟 ADMIN SECURE AUTH CHECK 🌟
+        auth.onAuthStateChanged(user => {
+            if (user && localStorage.getItem('stz_admin_login') === 'true') {
+                loadPendingRequests();
+            } else { 
+                window.location.href="admin_login.html"; 
+            }
+        });
+
+        function logoutAdmin() {
+            localStorage.removeItem('stz_admin_login');
+            auth.signOut().then(() => { 
+                window.location.href = "admin_login.html"; 
+            });
+        }
+
+        // --- Load Pending Campaigns ---
+        function loadPendingRequests() {
+            db.ref('campaigns').orderByChild('status').equalTo('pending').on('value', snapshot => {
+                const container = document.getElementById('pending-list');
+                container.innerHTML = '';
+
+                if (!snapshot.exists()) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-check-circle"></i>
+                            <h3 style="color: var(--text-dark); margin: 0 0 10px 0;">All Caught Up!</h3>
+                            <p style="margin:0;">There are currently no pending campaigns to review.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let campaignsArr = [];
+                snapshot.forEach(child => { campaignsArr.push({ id: child.key, ...child.val() }); });
+                campaignsArr.reverse(); // Show newest first
+
+                campaignsArr.forEach(camp => {
+                    
+                    let iconColor = "var(--primary-blue)";
+                    let iconClass = "fa-globe";
+                    
+                    if(camp.category === 'Video Ad') { iconClass = 'fa-video'; }
+                    else if(camp.category === 'YouTube') { iconClass = 'fa-youtube'; iconColor = '#ff0000'; }
+                    else if(camp.category === 'Sign Up') { iconClass = 'fa-user-plus'; }
+                    else if(camp.category === 'App Download') { iconClass = 'fa-google-play'; iconColor = '#3DDC84'; }
+                    else if(camp.category === 'Facebook') { iconClass = 'fa-facebook'; iconColor = '#1877F2'; }
+
+                    const totalCost = camp.totalViews * (camp.costPerView || camp.duration);
+
+                    // Check if campaign has a description
+                    let descHtml = '';
+                    if(camp.description && camp.description.trim() !== '') {
+                        descHtml = `
+                            <div class="req-desc-box">
+                                <div class="req-desc-label"><i class="fas fa-info-circle"></i> Instructions / Description</div>
+                                ${camp.description}
+                            </div>
+                        `;
+                    }
+
+                    const cardHtml = `
+                        <div class="req-card" id="card-${camp.id}">
+                            
+                            <div class="req-header">
+                                <div class="req-title-box">
+                                    <h4 class="req-title">${camp.title}</h4>
+                                    <span style="font-size: 12px; color: var(--text-light);"><i class="fas fa-link"></i> ${camp.url.substring(0, 40)}${camp.url.length > 40 ? '...' : ''}</span>
+                                </div>
+                                <div class="badge"><i class="fas fa-circle" style="font-size: 8px;"></i> Pending Review</div>
+                            </div>
+
+                            ${descHtml} <div class="req-info-grid">
+                                <div class="info-item">
+                                    <div class="info-icon" style="color: ${iconColor};"><i class="${camp.category === 'YouTube' || camp.category === 'Facebook' || camp.category === 'App Download' ? 'fab' : 'fas'} ${iconClass}"></i></div>
+                                    <div class="info-text">
+                                        <span class="info-label">Category</span>
+                                        <span class="info-value">${camp.category || 'Website Visit'}</span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon" style="color: var(--primary-blue);"><i class="fas fa-bullseye"></i></div>
+                                    <div class="info-text">
+                                        <span class="info-label">Target / Reward</span>
+                                        <span class="info-value">${camp.totalViews} Views <small style="color:var(--text-light);">(${camp.duration || camp.costPerView}s)</small></span>
+                                    </div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-icon" style="color: var(--warning);"><i class="fas fa-coins"></i></div>
+                                    <div class="info-text">
+                                        <span class="info-label">Total Cost</span>
+                                        <span class="info-value">${totalCost} Coins</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="user-id-box">
+                                <div><i class="fas fa-fingerprint" style="margin-right: 5px;"></i> Publisher UID:</div>
+                                <span>${camp.uid}</span>
+                            </div>
+
+                            <div class="req-actions">
+                                <button class="btn btn-view" onclick="window.open('${camp.url}', '_blank')"><i class="fas fa-external-link-alt"></i> Inspect Link</button>
+                                <button class="btn btn-reject" onclick="rejectCampaign('${camp.id}', '${camp.uid}', ${totalCost})"><i class="fas fa-times"></i> Reject & Refund</button>
+                                <button class="btn btn-approve" onclick="approveCampaign('${camp.id}')"><i class="fas fa-check-circle"></i> Approve Ad</button>
+                            </div>
+
+                        </div>
+                    `;
+                    container.innerHTML += cardHtml;
+                });
+            });
+        }
+
+        // --- Approve Campaign ---
+        function approveCampaign(campId) {
+            if(confirm("Approve this campaign? It will be visible to users immediately.")) {
+                db.ref('campaigns/' + campId).update({
+                    status: 'active'
+                }).then(() => {
+                    // Success silently updates real-time UI
+                }).catch(err => alert("Error: " + err.message));
+            }
+        }
+
+        // --- Reject Campaign & Refund Coins ---
+        function rejectCampaign(campId, userUid, refundAmount) {
+            const reason = prompt("Enter the reason for rejection (This will be shown to the user):");
+            
+            if (reason === null) return; 
+            if (reason.trim() === "") {
+                alert("You must provide a reason for rejection!");
+                return;
+            }
+
+            if(confirm(`Are you sure you want to reject?\n\n${refundAmount} coins will be refunded to the publisher's account.`)) {
+                
+                db.ref('campaigns/' + campId).update({
+                    status: 'rejected',
+                    rejectReason: reason
+                }).then(() => {
+                    
+                    db.ref('users/' + userUid + '/coins').transaction((currentCoins) => {
+                        return (currentCoins || 0) + refundAmount;
+                    });
+
+                }).catch(err => alert("Error: " + err.message));
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Profile | STZ Exchange</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        /* --- Premium Light Theme Variables --- */
+        :root {
+            --primary-blue: #4e73df;
+            --primary-hover: #2e59d9;
+            --bg-body: #f8f9fc;
+            --bg-white: #ffffff;
+            --text-main: #5a5c69;
+            --text-dark: #3a3b45;
+            --text-light: #b7b9cc;
+            --border-color: #eaecf4;
+            --shadow-sm: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100dvh; overflow: hidden; }
+
+        /* --- Main Content Area (Full Width, No Sidebar) --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; position: relative; }
+
+        /* Top Header - ONLY BRAND AND COINS */
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 10; }
+        
+        .mobile-brand { display: flex; font-size: 20px; font-weight: 700; color: var(--text-dark); align-items: center; gap: 8px; }
+        
+        .user-info { display: flex; align-items: center; justify-content: flex-end; }
+        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 18px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 16px; border: 1px solid rgba(246, 194, 62, 0.5); }
+
+        /* --- Profile Body --- */
+        .dashboard-body { padding: 25px 20px 90px 20px; overflow-y: auto; flex: 1; }
+        .profile-container { max-width: 600px; margin: 0 auto; width: 100%; }
+        .page-title { font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0 0 25px 0; text-transform: uppercase; letter-spacing: 1px;}
+
+        /* Profile Header Card */
+        .profile-header { background: var(--bg-white); border: 1px solid var(--border-color); padding: 30px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; margin-bottom: 25px; box-shadow: var(--shadow-sm); }
+        
+        /* Updated Avatar CSS */
+        .avatar-container { position: relative; width: 100px; height: 100px; margin-bottom: 5px;}
+        .profile-avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid var(--primary-blue); background: #eee; padding: 3px;}
+        .avatar-upload-btn { position: absolute; bottom: 0; right: 0; background: var(--primary-blue); color: #fff; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; border: 2px solid #fff; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .avatar-upload-btn:hover { background: var(--primary-hover); transform: scale(1.1); }
+        #avatar-input { display: none; }
+        .loading-spinner { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); border-radius: 50%; justify-content: center; align-items: center; font-size: 24px; color: var(--primary-blue); z-index: 5;}
+
+        .profile-info h3 { margin: 0 0 5px 0; font-size: 20px; color: var(--text-dark); font-weight: 700;}
+        .profile-info p { margin: 0; color: var(--text-main); font-size: 14px; }
+        .badge { display: inline-block; background: rgba(28, 200, 138, 0.1); color: #1cc88a; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-top: 10px; }
+
+        /* Quick Action Menu */
+        .action-menu { display: flex; flex-direction: column; gap: 12px; }
+        
+        .action-card { background: var(--bg-white); border: 1px solid var(--border-color); padding: 18px 20px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.02); transition: 0.3s; cursor: pointer; }
+        .action-card:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.08); border-color: rgba(78, 115, 223, 0.3); }
+        
+        .action-left { display: flex; align-items: center; gap: 15px; }
+        .action-icon { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        
+        .icon-blue { background: rgba(78, 115, 223, 0.1); color: var(--primary-blue); }
+        .icon-yellow { background: rgba(246, 194, 62, 0.1); color: #f6c23e; }
+        .icon-green { background: rgba(28, 200, 138, 0.1); color: #1cc88a; }
+        .icon-purple { background: rgba(102, 16, 242, 0.1); color: #6610f2; }
+        .icon-red { background: rgba(231, 74, 59, 0.1); color: #e74a3b; }
+
+        .action-text { font-size: 15px; font-weight: 600; color: var(--text-dark); }
+        .action-value { font-size: 16px; font-weight: 700; color: var(--text-dark); }
+        
+        .action-card i.fa-chevron-right { color: var(--text-light); transition: 0.3s; font-size: 14px;}
+        .action-card:hover i.fa-chevron-right { color: var(--primary-blue); transform: translateX(3px); }
+
+        /* 🌟 BOTTOM NAVIGATION 🌟 */
+        .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--bg-white); border-top: 1px solid var(--border-color); z-index: 1000; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom); }
+        .b-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); text-decoration: none; font-size: 12px; font-weight: 600; gap: 5px; width: 25%; transition: 0.3s; cursor: pointer; }
+        .b-nav-item i { font-size: 20px; }
+        .b-nav-item:hover { color: var(--primary-hover); }
+        .b-nav-item.active { color: var(--primary-blue); }
+        .b-nav-item.active i { transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="mobile-brand"><i class="fas fa-play" style="color:var(--primary-blue);"></i> STZ</div>
+            <div class="user-info">
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">...</span></div>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            <div class="profile-container">
+                <h2 class="page-title">My Profile</h2>
+                
+                <div class="profile-header">
+                    
+                    <div class="avatar-container">
+                        <img src="" id="prof-avatar" class="profile-avatar" alt="Profile">
+                        <div class="loading-spinner" id="avatar-loading"><i class="fas fa-spinner fa-spin"></i></div>
+                        
+                        <label for="avatar-input" class="avatar-upload-btn">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                       <input type="file" id="avatar-input" accept="image/png, image/jpeg, image/jpg" onchange="uploadProfileImage(event)">
+                    </div>
+
+                    <div class="profile-info">
+                        <h3 id="prof-name">Loading...</h3>
+                        <p id="prof-email">loading@email.com</p>
+                        <div class="badge"><i class="fas fa-check-circle"></i> Account Verified</div>
+                    </div>
+                </div>
+
+                <div class="action-menu">
+                    
+                    <div class="action-card" onclick="window.location.href='dashboard.html'">
+                        <div class="action-left">
+                            <div class="action-icon icon-blue"><i class="fas fa-chart-line"></i></div>
+                            <div class="action-text">Dashboard</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+
+                    <div class="action-card" style="cursor: default;">
+                        <div class="action-left">
+                            <div class="action-icon icon-yellow"><i class="fas fa-wallet"></i></div>
+                            <div class="action-text">Total Balance</div>
+                        </div>
+                        <div class="action-value" id="prof-coins">0 <i class="fas fa-coins" style="font-size: 14px; color: #f6c23e;"></i></div>
+                    </div>
+
+                    <div class="action-card" style="cursor: default;">
+                        <div class="action-left">
+                            <div class="action-icon icon-green"><i class="fas fa-mouse-pointer"></i></div>
+                            <div class="action-text">Links Surfed</div>
+                        </div>
+                        <div class="action-value" id="prof-surfed">0</div>
+                    </div>
+
+                    <div class="action-card" onclick="window.location.href='refer.html'">
+                        <div class="action-left">
+                            <div class="action-icon icon-purple"><i class="fas fa-users-cog"></i></div>
+                            <div class="action-text">Refer & Earn</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+
+                    <div class="action-card" onclick="window.location.href='support.html'">
+                        <div class="action-left">
+                            <div class="action-icon icon-blue"><i class="fas fa-headset"></i></div>
+                            <div class="action-text">Contact Support</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+
+                    <div class="action-card" onclick="logoutUser()">
+                        <div class="action-left">
+                            <div class="action-icon icon-red"><i class="fas fa-sign-out-alt"></i></div>
+                            <div class="action-text" style="color: #e74a3b;">Logout</div>
+                        </div>
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="b-nav-item">
+            <i class="fas fa-home"></i> <span>Home</span>
+        </a>
+        <a href="surf.html" class="b-nav-item">
+            <i class="fas fa-mouse-pointer"></i> <span>Surf</span>
+        </a>
+        <a href="campaign.html" class="b-nav-item">
+            <i class="fas fa-plus-circle"></i> <span>Add Ad</span>
+        </a>
+        <a href="profile.html" class="b-nav-item active">
+            <i class="fas fa-user"></i> <span>Profile</span>
+        </a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+    <script>
+        // 🌟 Initialize Telegram Web App
+        try {
+            const tg = window.Telegram.WebApp;
+            tg.expand(); 
+            tg.ready();
+        } catch(e) {
+            console.log("Not running inside Telegram");
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+        const storage = firebase.storage();
+
+        let currentUserUid = null;
+
+        auth.onAuthStateChanged(user => {
+            if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
+                currentUserUid = user.uid;
+                document.getElementById('prof-email').innerText = user.email;
+
+                db.ref('users/' + user.uid).on('value', s => {
+                    const data = s.val();
+                    if(data) {
+                        const userName = data.fullName || 'User';
+                        document.getElementById('prof-name').innerText = userName;
+                        
+                        if(data.profileImage) {
+                            document.getElementById('prof-avatar').src = data.profileImage;
+                        } else {
+                            document.getElementById('prof-avatar').src = `https://ui-avatars.com/api/?name=${userName}&background=4e73df&color=fff&size=100`;
+                        }
+
+                        document.getElementById('bal').innerText = data.coins || 0;
+                        document.getElementById('prof-coins').innerHTML = `${data.coins || 0}`;
+                        document.getElementById('prof-surfed').innerText = data.totalSurfed || 0;
+                    }
+                });
+            } else { 
+                window.location.href="index.html"; 
+            }
+        });
+
+        // Upload Profile Image
+        async function uploadProfileImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 2 * 1024 * 1024) {
+                if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+                    window.Telegram.WebApp.showAlert("File is too large! Please select an image smaller than 2MB.");
+                } else {
+                    alert("File is too large! Please select an image smaller than 2MB.");
+                }
+                event.target.value = ''; 
+                return;
+            }
+
+            const loadingSpinner = document.getElementById('avatar-loading');
+            loadingSpinner.style.display = 'flex';
+
+            try {
+                const storageRef = storage.ref('profile_images/' + currentUserUid + '_avatar');
+                await storageRef.put(file);
+                const downloadURL = await storageRef.getDownloadURL();
+                
+                await db.ref('users/' + currentUserUid).update({
+                    profileImage: downloadURL
+                });
+
+                document.getElementById('prof-avatar').src = downloadURL;
+                loadingSpinner.style.display = 'none';
+                
+            } catch (error) {
+                loadingSpinner.style.display = 'none';
+                console.error("Upload Error:", error);
+                if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+                    window.Telegram.WebApp.showAlert("Error uploading image. Please try again.");
+                }
+            }
+        }
+
+        // 🌟 FIXED USER LOGOUT FUNCTION 🌟
+        function logoutUser() {
+            localStorage.removeItem('stz_user_login'); 
+            auth.signOut().then(() => { 
+                window.location.href = "index.html"; 
+            });
+        }
+    </script>
+</body>
+</html>

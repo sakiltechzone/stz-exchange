@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Select Campaign | STZ Exchange</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root { 
+            --primary-blue: #4e73df; 
+            --primary-hover: #2e59d9; 
+            --bg-body: #f8f9fc; 
+            --bg-white: #ffffff; 
+            --text-main: #5a5c69; 
+            --text-dark: #3a3b45; 
+            --text-light: #b7b9cc; 
+            --border-color: #eaecf4; 
+            --shadow-sm: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); 
+        }
+        
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100dvh; overflow: hidden; }
+        
+        /* --- Main Content Area (Full Width, No Sidebar) --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; position: relative; }
+
+        /* Top Header - ONLY BRAND AND COINS */
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 10; }
+        .mobile-brand { display: flex; font-size: 20px; font-weight: 700; color: var(--text-dark); align-items: center; gap: 8px; }
+        .user-info { display: flex; align-items: center; justify-content: flex-end; }
+        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 18px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 16px; border: 1px solid rgba(246, 194, 62, 0.5); }
+        
+        /* --- Dashboard Body --- */
+        .dashboard-body { padding: 25px 20px 90px 20px; overflow-y: auto; flex: 1; }
+        .form-container { max-width: 800px; margin: 0 auto; width: 100%; }
+        
+        /* Page Titles */
+        .page-title { font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        .page-subtitle { color: var(--text-main); font-size: 13px; margin-top: 0; margin-bottom: 25px; line-height: 1.5; }
+
+        /* Grid & Cards */
+        .category-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; }
+        .category-card { background: var(--bg-white); border: 1px solid var(--border-color); padding: 25px 20px; border-radius: 15px; text-align: center; cursor: pointer; transition: 0.3s; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center;}
+        
+        .category-card::before { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: var(--primary-blue); transform: scaleX(0); transition: 0.3s; transform-origin: left; }
+        .category-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.08); border-color: rgba(78, 115, 223, 0.3); }
+        .category-card:hover::before { transform: scaleX(1); }
+        
+        .cat-icon-box { width: 60px; height: 60px; background: rgba(78, 115, 223, 0.1); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin-bottom: 15px; transition: 0.3s; }
+        .cat-icon { font-size: 28px; color: var(--primary-blue); transition: 0.3s;}
+        
+        .cat-title { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 5px; }
+        .cat-desc { font-size: 12px; color: var(--text-main); line-height: 1.4; }
+        
+        /* Specific Brand Colors on Hover */
+        .youtube-card:hover .cat-icon-box { background: rgba(255, 0, 0, 0.1); }
+        .youtube-card:hover .cat-icon { color: #ff0000; }
+        .youtube-card:hover::before { background: #ff0000; }
+
+        .facebook-card:hover .cat-icon-box { background: rgba(24, 119, 242, 0.1); }
+        .facebook-card:hover .cat-icon { color: #1877F2; }
+        .facebook-card:hover::before { background: #1877F2; }
+
+        .app-card:hover .cat-icon-box { background: rgba(61, 220, 132, 0.1); }
+        .app-card:hover .cat-icon { color: #3DDC84; }
+        .app-card:hover::before { background: #3DDC84; }
+
+        .video-card:hover .cat-icon-box { background: rgba(255, 0, 0, 0.1); }
+        .video-card:hover .cat-icon { color: #ff0000; }
+        .video-card:hover::before { background: #ff0000; }
+
+        /* 🌟 BOTTOM NAVIGATION 🌟 */
+        .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--bg-white); border-top: 1px solid var(--border-color); z-index: 1000; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom); }
+        .b-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); text-decoration: none; font-size: 12px; font-weight: 600; gap: 5px; width: 25%; transition: 0.3s; cursor: pointer; }
+        .b-nav-item i { font-size: 20px; }
+        .b-nav-item:hover { color: var(--primary-hover); }
+        .b-nav-item.active { color: var(--primary-blue); }
+        .b-nav-item.active i { transform: translateY(-2px); }
+
+        @media (max-width: 768px) {
+            .category-grid { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .category-card { padding: 20px 15px; }
+            .cat-icon-box { width: 50px; height: 50px; margin-bottom: 12px;}
+            .cat-icon { font-size: 24px; }
+            .cat-title { font-size: 14px; }
+            .cat-desc { display: none; } /* Hide description on very small screens for cleaner look */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="mobile-brand"><i class="fas fa-play" style="color:var(--primary-blue);"></i> STZ</div>
+            <div class="user-info">
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">...</span></div>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            <div class="form-container">
+                <h2 class="page-title"><i class="fas fa-bullhorn" style="color: var(--primary-blue);"></i> Create Campaign</h2>
+                <p class="page-subtitle">Choose the type of task you want users to complete to earn coins.</p>
+                
+                <div class="category-grid">
+                    
+                    <div class="category-card" onclick="window.location.href='website_visit.html'">
+                        <div class="cat-icon-box"><i class="fas fa-globe cat-icon"></i></div>
+                        <div class="cat-title">Website Visit</div>
+                        <div class="cat-desc">Get real traffic to your site</div>
+                    </div>
+
+                    <div class="category-card" onclick="window.location.href='sign_up.html'">
+                        <div class="cat-icon-box"><i class="fas fa-user-plus cat-icon"></i></div>
+                        <div class="cat-title">Sign Up</div>
+                        <div class="cat-desc">Increase user registrations</div>
+                    </div>
+
+                    <div class="category-card youtube-card" onclick="window.location.href='youtube_add.html'">
+                        <div class="cat-icon-box"><i class="fab fa-youtube cat-icon"></i></div>
+                        <div class="cat-title">YouTube</div>
+                        <div class="cat-desc">Boost video views & subs</div>
+                    </div>
+
+                    <div class="category-card app-card" onclick="window.location.href='app_download.html'">
+                        <div class="cat-icon-box"><i class="fab fa-google-play cat-icon"></i></div>
+                        <div class="cat-title">App Download</div>
+                        <div class="cat-desc">Get more app installs</div>
+                    </div>
+
+                    <div class="category-card facebook-card" onclick="window.location.href='facebook_add.html'">
+                        <div class="cat-icon-box"><i class="fab fa-facebook cat-icon"></i></div>
+                        <div class="cat-title">Facebook</div>
+                        <div class="cat-desc">Increase likes & followers</div>
+                    </div>
+
+                    <div class="category-card video-card" onclick="window.location.href='video_add.html'">
+                        <div class="cat-icon-box"><i class="fas fa-video cat-icon"></i></div>
+                        <div class="cat-title">Video Ad</div>
+                        <div class="cat-desc">Promote your video content</div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="b-nav-item">
+            <i class="fas fa-home"></i> <span>Home</span>
+        </a>
+        <a href="surf.html" class="b-nav-item">
+            <i class="fas fa-mouse-pointer"></i> <span>Surf</span>
+        </a>
+        <a href="campaign.html" class="b-nav-item active">
+            <i class="fas fa-plus-circle"></i> <span>Add Ad</span>
+        </a>
+        <a href="profile.html" class="b-nav-item">
+            <i class="fas fa-user"></i> <span>Profile</span>
+        </a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
+    <script>
+        // 🌟 Initialize Telegram Web App
+        try {
+            const tg = window.Telegram.WebApp;
+            tg.expand(); 
+            tg.ready();
+        } catch(e) {
+            console.log("Not running inside Telegram");
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        auth.onAuthStateChanged(user => {
+            if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
+                db.ref('users/' + user.uid + '/coins').on('value', s => {
+                    document.getElementById('bal').innerText = s.val() || 0;
+                });
+            } else { 
+                window.location.href = "index.html"; 
+            }
+        });
+
+    </script>
+</body>
+</html>

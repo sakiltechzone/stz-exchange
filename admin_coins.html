@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Coins | Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-dark: #2c3e50;
+            --primary-blue: #4e73df;
+            --primary-hover: #2e59d9;
+            --bg-body: #f4f6fa;
+            --bg-white: #ffffff;
+            --text-main: #5a5c69;
+            --text-dark: #3a3b45;
+            --text-light: #b7b9cc;
+            --border-color: #eaecf4;
+            --danger: #e74a3b;
+            --success: #1cc88a;
+            --warning: #f6c23e;
+            --shadow-sm: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- ADMIN SIDEBAR --- */
+        .sidebar { width: 260px; background: var(--primary-dark); display: flex; flex-direction: column; height: 100vh; position: fixed; transition: 0.3s; z-index: 1000; color: #fff; box-shadow: 2px 0 15px rgba(0,0,0,0.1);}
+        .sidebar-brand { height: 70px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sidebar-brand i { color: var(--warning); font-size: 24px; margin-right: 10px; }
+        
+        .nav-menu { padding: 15px; display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto;}
+        .menu-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin: 15px 0 5px 10px; letter-spacing: 1px; }
+
+        .nav-item { padding: 12px 15px; color: rgba(255,255,255,0.7); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 500; transition: all 0.2s;}
+        .nav-item i.main-icon { font-size: 16px; width: 20px; text-align: center; transition: 0.2s; }
+        
+        .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .nav-item.active { background: var(--primary-blue); color: #fff; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); }
+
+        /* --- Main Content Area --- */
+        .main-content { margin-left: 260px; flex: 1; display: flex; flex-direction: column; width: calc(100% - 260px); }
+
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 10; border-bottom: 1px solid var(--border-color);}
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; font-size: 20px; color: var(--text-main); cursor: pointer; padding: 8px; border-radius: 5px; }
+        
+        .admin-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text-dark); background: rgba(78, 115, 223, 0.1); padding: 6px 15px; border-radius: 20px; border: 1px solid rgba(78, 115, 223, 0.2);}
+        .admin-profile i { font-size: 20px; color: var(--primary-blue); }
+
+        /* --- Dashboard Body --- */
+        .dashboard-body { padding: 30px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; align-items: center; }
+        
+        .page-header { width: 100%; max-width: 600px; text-align: center; margin-bottom: 30px; }
+        .page-title { font-size: 24px; font-weight: 700; color: var(--text-dark); margin: 0 0 5px 0; display: flex; align-items: center; justify-content: center; gap: 10px;}
+        .page-subtitle { color: var(--text-main); font-size: 14px; margin: 0; }
+
+        /* Card Container */
+        .action-card { background: var(--bg-white); width: 100%; max-width: 600px; border-radius: 15px; padding: 30px; box-shadow: var(--shadow-sm); border-top: 5px solid var(--success); transition: 0.3s; }
+
+        /* Search Section */
+        .search-section { display: flex; gap: 10px; margin-bottom: 25px; }
+        .search-input-wrapper { flex: 1; display: flex; align-items: center; background: var(--bg-body); border: 1.5px solid var(--border-color); border-radius: 8px; padding: 5px 15px; transition: 0.3s; }
+        .search-input-wrapper:focus-within { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1); }
+        .search-input-wrapper i { color: var(--text-light); margin-right: 10px; }
+        .search-input { width: 100%; padding: 10px 0; border: none; background: transparent; outline: none; font-family: 'Poppins', sans-serif; font-size: 14px; color: var(--text-dark);}
+        
+        .btn-search { background: var(--primary-blue); color: #fff; border: none; padding: 0 25px; border-radius: 8px; font-weight: 600; font-family: 'Poppins', sans-serif; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 8px; }
+        .btn-search:hover { background: var(--primary-hover); box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); }
+
+        /* Result Section (Hidden initially) */
+        #user-result { display: none; border-top: 1px dashed var(--border-color); padding-top: 25px; animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .user-profile-box { display: flex; align-items: center; gap: 15px; background: rgba(28, 200, 138, 0.05); padding: 15px; border-radius: 10px; border: 1px solid rgba(28, 200, 138, 0.2); margin-bottom: 25px; }
+        .user-avatar { width: 50px; height: 50px; border-radius: 50%; border: 2px solid var(--success); }
+        .user-info { flex: 1; }
+        .user-name { font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0; }
+        .user-email { font-size: 13px; color: var(--text-main); margin: 0; }
+        .user-balance { background: var(--bg-white); padding: 5px 15px; border-radius: 20px; font-weight: 700; color: var(--warning); border: 1px solid rgba(246, 194, 62, 0.5); font-size: 18px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);}
+
+        /* Transaction Section */
+        .transaction-form { background: var(--bg-body); padding: 20px; border-radius: 12px; border: 1px solid var(--border-color); }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-dark); margin-bottom: 8px; }
+        .coin-input { width: 100%; padding: 12px 15px; border: 2px solid var(--border-color); border-radius: 8px; font-size: 16px; font-weight: 700; color: var(--text-dark); outline: none; font-family: 'Poppins', sans-serif; box-sizing: border-box; transition: 0.3s;}
+        .coin-input:focus { border-color: var(--warning); box-shadow: 0 0 0 3px rgba(246, 194, 62, 0.2); }
+
+        .action-buttons { display: flex; gap: 15px; margin-top: 20px; }
+        .btn-add { flex: 1; background: var(--success); color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 15px; font-family: 'Poppins', sans-serif; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-add:hover { background: #13855c; box-shadow: 0 5px 15px rgba(28, 200, 138, 0.4); transform: translateY(-2px); }
+        
+        .btn-deduct { flex: 1; background: var(--danger); color: #fff; border: none; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 15px; font-family: 'Poppins', sans-serif; cursor: pointer; transition: 0.3s; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-deduct:hover { background: #c0392b; box-shadow: 0 5px 15px rgba(231, 74, 59, 0.4); transform: translateY(-2px); }
+
+        /* Loader */
+        #search-loader { display: none; text-align: center; padding: 20px; color: var(--primary-blue); }
+
+        /* Mobile Overlay */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; width: 100%; }
+            .menu-toggle { display: block; }
+            .sidebar-overlay.active { display: block; }
+            .dashboard-body { padding: 20px 15px; }
+            .action-buttons { flex-direction: column; }
+            .user-profile-box { flex-direction: column; text-align: center; }
+            .search-section { flex-direction: column; }
+            .btn-search { padding: 12px; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar-overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand"><i class="fas fa-user-shield"></i> Admin Panel</div>
+        
+        <div class="nav-menu">
+            <div class="menu-label">CORE</div>
+            <div class="nav-item" onclick="window.location.href='admin_dashboard.html'"><i class="fas fa-tachometer-alt main-icon"></i> <span>Dashboard</span></div>
+            
+            <div class="menu-label">MANAGEMENT</div>
+            <div class="nav-item" onclick="window.location.href='admin_pending.html'"><i class="fas fa-clock main-icon"></i> <span>Pending Requests</span></div>
+            <div class="nav-item" onclick="window.location.href='admin_active.html'"><i class="fas fa-check-circle main-icon"></i> <span>Active Campaigns</span></div>
+            <div class="nav-item" onclick="window.location.href='admin_users.html'"><i class="fas fa-users main-icon"></i> <span>Manage Users</span></div>
+            
+            <div class="menu-label">FINANCE & SETTINGS</div>
+            <div class="nav-item active" onclick="window.location.href='admin_coins.html'"><i class="fas fa-hand-holding-usd main-icon"></i> <span>Add/Deduct Coins</span></div>
+            <div class="nav-item" onclick="window.location.href='admin_settings.html'"><i class="fas fa-cogs main-icon"></i> <span>App Settings</span></div>
+            
+            <div class="nav-item" onclick="logoutAdmin()" style="margin-top: 20px; color: #ff6b6b;"><i class="fas fa-sign-out-alt main-icon"></i> <span>Logout</span></div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="header-left">
+                <div class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+            </div>
+            <div class="admin-profile">
+                <span>Admin</span>
+                <i class="fas fa-user-circle"></i>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            
+            <div class="page-header">
+                <h2 class="page-title"><i class="fas fa-hand-holding-usd" style="color: var(--success);"></i> Manage User Funds</h2>
+                <p class="page-subtitle">Search for a user by their Email Address or UID to instantly update their coin balance.</p>
+            </div>
+
+            <div class="action-card">
+                
+                <div class="search-section">
+                    <div class="search-input-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="search-query" class="search-input" placeholder="Enter User UID or Email Address...">
+                    </div>
+                    <button class="btn-search" onclick="searchUser()"><i class="fas fa-arrow-right"></i> Find User</button>
+                </div>
+
+                <div id="search-loader">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p style="margin-top: 10px; font-size: 14px;">Searching Database...</p>
+                </div>
+
+                <div id="user-result">
+                    <div class="user-profile-box">
+                        <img src="" id="res-avatar" class="user-avatar" alt="User">
+                        <div class="user-info">
+                            <h4 class="user-name" id="res-name">Loading...</h4>
+                            <p class="user-email" id="res-email">loading...</p>
+                            <p style="font-size: 11px; color: var(--primary-blue); font-family: monospace; margin: 3px 0 0 0;" id="res-uid">UID: </p>
+                        </div>
+                        <div class="user-balance">
+                            <span id="res-coins">0</span> <i class="fas fa-coins"></i>
+                        </div>
+                    </div>
+
+                    <div class="transaction-form">
+                        <div class="input-group">
+                            <label><i class="fas fa-coins" style="color: var(--warning);"></i> Transaction Amount (Coins)</label>
+                            <input type="number" id="trans-amount" class="coin-input" placeholder="Enter amount e.g. 500" min="1">
+                        </div>
+                        
+                        <div class="action-buttons">
+                            <button class="btn-add" onclick="processTransaction('add')"><i class="fas fa-plus-circle"></i> Add Coins</button>
+                            <button class="btn-deduct" onclick="processTransaction('deduct')"><i class="fas fa-minus-circle"></i> Deduct Coins</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('mobile-overlay').classList.toggle('active');
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        // 🌟 ADMIN SECURE AUTH CHECK 🌟
+        auth.onAuthStateChanged(user => {
+            if (!user || localStorage.getItem('stz_admin_login') !== 'true') {
+                window.location.href="admin_login.html"; 
+            }
+        });
+
+        function logoutAdmin() {
+            localStorage.removeItem('stz_admin_login');
+            auth.signOut().then(() => { 
+                window.location.href = "admin_login.html"; 
+            });
+        }
+
+        let currentTargetUid = null;
+
+        // --- Search User Logic ---
+        function searchUser() {
+            const query = document.getElementById('search-query').value.trim();
+            const loader = document.getElementById('search-loader');
+            const resultBox = document.getElementById('user-result');
+
+            if (query === "") {
+                alert("Please enter a UID or Email address to search.");
+                return;
+            }
+
+            resultBox.style.display = 'none';
+            loader.style.display = 'block';
+            currentTargetUid = null;
+
+            // Search in Firebase
+            db.ref('users').once('value').then((snapshot) => {
+                let foundUser = null;
+                let foundUid = null;
+
+                snapshot.forEach(child => {
+                    const data = child.val();
+                    if (child.key === query || (data.email && data.email.toLowerCase() === query.toLowerCase())) {
+                        foundUser = data;
+                        foundUid = child.key;
+                    }
+                });
+
+                loader.style.display = 'none';
+
+                if (foundUser) {
+                    currentTargetUid = foundUid;
+                    const name = foundUser.fullName || "Unknown";
+                    
+                    document.getElementById('res-name').innerText = name;
+                    document.getElementById('res-email').innerText = foundUser.email || "No Email";
+                    document.getElementById('res-uid').innerText = "UID: " + foundUid;
+                    
+                    // Live listener for coins
+                    db.ref('users/' + foundUid + '/coins').on('value', (s) => {
+                        document.getElementById('res-coins').innerText = s.val() || 0;
+                    });
+
+                    document.getElementById('res-avatar').src = foundUser.profileImage || `https://ui-avatars.com/api/?name=${name}&background=4e73df&color=fff`;
+                    
+                    document.getElementById('trans-amount').value = '';
+                    resultBox.style.display = 'block';
+                } else {
+                    alert("No user found with that UID or Email!");
+                }
+            }).catch(err => {
+                loader.style.display = 'none';
+                alert("Error searching database: " + err.message);
+            });
+        }
+
+        // --- Process Transaction (Add/Deduct) ---
+        function processTransaction(actionType) {
+            if (!currentTargetUid) return;
+
+            const amountInput = document.getElementById('trans-amount').value;
+            const amount = parseInt(amountInput);
+
+            if (!amount || amount <= 0 || isNaN(amount)) {
+                alert("Please enter a valid coin amount!");
+                return;
+            }
+
+            const confirmMsg = actionType === 'add' ? `Add ${amount} coins?` : `Deduct ${amount} coins?`;
+
+            if(confirm(`Are you sure you want to ${confirmMsg}`)) {
+                db.ref('users/' + currentTargetUid + '/coins').transaction(currentCoins => {
+                    let newBal = currentCoins || 0;
+                    if(actionType === 'add') {
+                        newBal += amount;
+                    } else if (actionType === 'deduct') {
+                        newBal -= amount;
+                        if(newBal < 0) newBal = 0; // Prevent negative balance
+                    }
+                    return newBal;
+                }).then(() => {
+                    document.getElementById('trans-amount').value = '';
+                    alert(`✅ Transaction Successful!`);
+                }).catch(err => alert("Transaction Failed: " + err.message));
+            }
+        }
+    </script>
+</body>
+</html>

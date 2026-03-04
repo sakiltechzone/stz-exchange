@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Add YouTube Ad | STZ Exchange</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
+
+    <style>
+        :root { 
+            --primary-blue: #4e73df; 
+            --primary-hover: #2e59d9; 
+            --bg-body: #f8f9fc; 
+            --bg-white: #ffffff; 
+            --text-main: #5a5c69; 
+            --text-dark: #3a3b45; 
+            --text-light: #b7b9cc; 
+            --border-color: #eaecf4; 
+            --shadow-sm: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); 
+        }
+        
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100dvh; overflow: hidden; }
+        
+        /* --- Main Content Area (Full Width) --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; position: relative; }
+
+        /* Top Header - ONLY BRAND AND COINS */
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 10; }
+        .mobile-brand { display: flex; font-size: 20px; font-weight: 700; color: var(--text-dark); align-items: center; gap: 8px; }
+        .user-info { display: flex; align-items: center; justify-content: flex-end; }
+        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 18px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 16px; border: 1px solid rgba(246, 194, 62, 0.5); }
+        
+        /* Form Specific Styles */
+        .dashboard-body { padding: 25px 20px 30px 20px; overflow-y: auto; flex: 1; }
+        .form-container { max-width: 600px; margin: 0 auto; width: 100%; }
+        
+        .page-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .page-title { font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        
+        .back-btn { background: rgba(78, 115, 223, 0.1); color: var(--primary-blue); border: none; padding: 8px 15px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; gap: 5px; text-decoration: none;}
+        .back-btn:hover { background: var(--primary-blue); color: #fff; }
+
+        .campaign-card { background: var(--bg-white); border: 1px solid var(--border-color); padding: 25px 20px; border-radius: 15px; box-shadow: var(--shadow-sm); }
+        
+        .warning-box { background: rgba(231, 74, 59, 0.1); border-left: 4px solid #e74a3b; padding: 15px; border-radius: 8px; color: #e74a3b; font-size: 13px; margin-bottom: 25px; line-height: 1.5; font-weight: 500;}
+        
+        .input-group { margin-bottom: 20px; }
+        .input-group label { display: block; font-size: 13px; color: var(--text-dark); margin-bottom: 8px; font-weight: 600; }
+        .input-wrapper { display: flex; align-items: flex-start; background: var(--bg-body); border: 1.5px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: 0.3s; }
+        .input-wrapper.align-center { align-items: center; } 
+        .input-wrapper:focus-within { border-color: #ff0000; background: var(--bg-white); box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.1); }
+        
+        .input-icon { padding: 15px 15px 0 15px; color: var(--text-light); font-size: 16px; width: 20px; display: flex; justify-content: center;}
+        .align-center .input-icon { padding: 0 15px; } 
+        .input-wrapper:focus-within .input-icon { color: #ff0000; }
+        
+        .custom-input { width: 100%; padding: 15px 15px 15px 0; background: transparent; border: none; color: var(--text-dark); font-size: 14px; outline: none; font-family: 'Poppins', sans-serif;}
+        .custom-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+        select.custom-input { padding-left: 0; cursor: pointer; }
+        
+        .cost-box { background: rgba(255, 0, 0, 0.05); border: 1.5px dashed #ff0000; padding: 15px; border-radius: 8px; text-align: center; margin-bottom: 25px; }
+        .submit-btn { width: 100%; padding: 14px; background: #ff0000; border: none; border-radius: 8px; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Poppins', sans-serif;}
+        .submit-btn:hover:not(:disabled) { background: #cc0000; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(255, 0, 0, 0.3); }
+        .submit-btn:disabled { background: var(--text-light); cursor: not-allowed; }
+
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="mobile-brand"><i class="fas fa-play" style="color:var(--primary-blue);"></i> STZ</div>
+            <div class="user-info">
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">...</span></div>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            <div class="form-container">
+                
+                <div class="page-header-flex">
+                    <h2 class="page-title"><i class="fab fa-youtube" style="color: #ff0000;"></i> Create YouTube Ad</h2>
+                    <a href="campaign.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back</a>
+                </div>
+
+                <div class="campaign-card">
+                    <div class="warning-box">
+                        <i class="fas fa-shield-alt"></i> <strong>Notice:</strong> Please provide a valid YouTube Video URL. Private or age-restricted videos will be rejected.
+                    </div>
+
+                    <div class="input-group">
+                        <label>Campaign Title (Max 30 chars)</label>
+                        <div class="input-wrapper align-center">
+                            <div class="input-icon"><i class="fas fa-heading"></i></div>
+                            <input type="text" id="camp-title" class="custom-input" maxlength="30">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>YouTube Video URL</label>
+                        <div class="input-wrapper align-center">
+                            <div class="input-icon"><i class="fab fa-youtube"></i></div>
+                            <input type="url" id="camp-url" class="custom-input">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Campaign Description (Instructions for users)</label>
+                        <div class="input-wrapper">
+                            <div class="input-icon"><i class="fas fa-align-left"></i></div>
+                            <textarea id="camp-desc" class="custom-input custom-textarea"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Watch Duration (Time on video)</label>
+                        <div class="input-wrapper align-center">
+                            <div class="input-icon"><i class="fas fa-clock"></i></div>
+                            <select id="camp-duration" class="custom-input" onchange="calculateCost()">
+                                <option value="30" selected>30 Seconds</option>
+                                <option value="45">45 Seconds</option>
+                                <option value="60">60 Seconds (1 Minute)</option>
+                                <option value="120">120 Seconds (2 Minutes)</option>
+                                <option value="180">180 Seconds (3 Minutes)</option>
+                                <option value="300">300 Seconds (5 Minutes)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label>Total Views Needed (Min 10)</label>
+                        <div class="input-wrapper align-center">
+                            <div class="input-icon"><i class="fas fa-eye"></i></div>
+                            <input type="number" id="camp-views" class="custom-input" min="10" oninput="calculateCost()">
+                        </div>
+                    </div>
+
+                    <div class="cost-box">
+                        <div style="color: var(--text-light); font-size: 12px; margin-bottom: 5px; text-transform: uppercase; font-weight: 700;">Total Cost (1 Coin = 1 Sec)</div>
+                        <span id="total-cost" style="font-size: 28px; font-weight: 700; color: #f6c23e;">0</span> <i class="fas fa-coins" style="color: #f6c23e;"></i>
+                    </div>
+
+                    <button class="submit-btn" id="submit-publish-btn" onclick="initiateCampaignSubmission()">
+                        <i class="fas fa-paper-plane"></i> Publish Campaign
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // 🌟 Initialize Telegram Web App
+        try {
+            const tg = window.Telegram.WebApp;
+            tg.expand(); 
+            tg.ready();
+        } catch(e) {
+            console.log("Not running inside Telegram");
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let userCoins = 0;
+        const JOB_CATEGORY = "YouTube"; 
+
+        // 🌟 AdsGram Configuration
+        let AdController = null;
+        db.ref('settings/adsgramBlockId').once('value').then(snapshot => {
+            if (snapshot.exists() && snapshot.val() !== "") {
+                try {
+                    AdController = window.Adsgram.init({ blockId: snapshot.val().toString() });
+                } catch(e) { console.error("AdsGram Init Error:", e); }
+            }
+        });
+
+        // 🌟 SECURED AUTH CHECK
+        auth.onAuthStateChanged(user => {
+            if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
+                db.ref('users/' + user.uid + '/coins').on('value', s => {
+                    userCoins = s.val() || 0;
+                    document.getElementById('bal').innerText = userCoins;
+                });
+            } else { 
+                window.location.href="index.html"; 
+            }
+        });
+
+        function calculateCost() {
+            let views = parseInt(document.getElementById('camp-views').value) || 0;
+            let duration = parseInt(document.getElementById('camp-duration').value) || 30;
+            document.getElementById('total-cost').innerText = views > 0 ? (views * duration) : 0;
+        }
+
+        function showAlert(msg) {
+            if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+                window.Telegram.WebApp.showAlert(msg);
+            } else {
+                alert(msg);
+            }
+        }
+
+        // 🌟 VALIDATE FORM & SHOW ADSGRAM AD
+        function initiateCampaignSubmission() {
+            const title = document.getElementById('camp-title').value.trim();
+            const url = document.getElementById('camp-url').value.trim();
+            const desc = document.getElementById('camp-desc').value.trim(); 
+            const views = parseInt(document.getElementById('camp-views').value);
+            const duration = parseInt(document.getElementById('camp-duration').value);
+            const totalCost = views * duration;
+
+            if(!title || !url || !views || !desc) { showAlert("⚠️ Please fill all fields, including the description!"); return; }
+            if(views < 10) { showAlert("⚠️ Minimum views required is 10!"); return; }
+            
+            // Validating YouTube link specifically
+            if(!url.includes("youtube.com") && !url.includes("youtu.be")) { 
+                showAlert("⚠️ Error: Please enter a valid YouTube Video URL!"); 
+                return; 
+            }
+            
+            if(userCoins < totalCost) { showAlert(`⚠️ Insufficient Balance! You need ${totalCost} coins, but you only have ${userCoins} coins.`); return; }
+
+            const btn = document.getElementById('submit-publish-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Preparing Ad...';
+
+            if (AdController) {
+                AdController.show().then((result) => {
+                    finalizeCampaignSubmission(title, url, desc, views, duration, totalCost);
+                }).catch((result) => {
+                    console.log("AdsGram Error/Skip:", result);
+                    showAlert("❌ Campaign submission failed! You must watch the complete ad to publish a campaign.");
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish Campaign';
+                });
+            } else {
+                finalizeCampaignSubmission(title, url, desc, views, duration, totalCost);
+            }
+        }
+
+        // 🌟 SAVE TO FIREBASE
+        function finalizeCampaignSubmission(title, url, desc, views, duration, totalCost) {
+            const btn = document.getElementById('submit-publish-btn');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+
+            const user = auth.currentUser;
+            
+            db.ref('users/' + user.uid + '/coins').set(userCoins - totalCost).then(() => {
+                db.ref('campaigns').push({
+                    uid: user.uid,
+                    category: JOB_CATEGORY, 
+                    title: title,
+                    url: url,
+                    description: desc, 
+                    duration: duration,
+                    costPerView: duration,
+                    totalViews: views,
+                    viewsCompleted: 0,
+                    status: 'pending', 
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+                        window.Telegram.WebApp.showAlert("✅ Success! Your YouTube campaign has been submitted and is pending approval.", () => {
+                            window.location.href = "campaign.html"; 
+                        });
+                    } else {
+                        alert("✅ Success! Your YouTube campaign has been submitted and is pending approval.");
+                        window.location.href = "campaign.html"; 
+                    }
+                }).catch(err => {
+                    console.error("Firebase Error:", err);
+                    showAlert("❌ Database Error. Please contact support.");
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane"></i> Publish Campaign';
+                });
+            });
+        }
+    </script>
+</body>
+</html>

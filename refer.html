@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Refer & Earn | STZ Exchange</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        /* --- Premium Light Theme Variables --- */
+        :root {
+            --primary-blue: #4e73df;
+            --primary-hover: #2e59d9;
+            --bg-body: #f8f9fc;
+            --bg-white: #ffffff;
+            --text-main: #5a5c69;
+            --text-dark: #3a3b45;
+            --text-light: #b7b9cc;
+            --border-color: #eaecf4;
+            --shadow-sm: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100dvh; overflow: hidden; }
+
+        /* --- Main Content Area (Full Width, No Sidebar) --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; position: relative; }
+
+        /* Top Header - ONLY BRAND AND COINS */
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 10; }
+        
+        .mobile-brand { display: flex; font-size: 20px; font-weight: 700; color: var(--text-dark); align-items: center; gap: 8px; }
+        
+        .user-info { display: flex; align-items: center; justify-content: flex-end; }
+        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 18px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 16px; border: 1px solid rgba(246, 194, 62, 0.5); }
+
+        /* --- Dashboard Body (Referral Design) --- */
+        /* Fixed Padding so nothing gets cut off at the bottom nav */
+        .dashboard-body { padding: 25px 20px 90px 20px; overflow-y: auto; flex: 1; }
+        .container { max-width: 900px; margin: 0 auto; width: 100%; }
+
+        /* Referral Hero Section */
+        .refer-hero { background: linear-gradient(135deg, var(--primary-blue), #6610f2); padding: 40px 30px; border-radius: 15px; color: #fff; text-align: center; box-shadow: 0 10px 25px rgba(78, 115, 223, 0.3); position: relative; overflow: hidden; margin-bottom: 30px;}
+        .refer-hero::after { content: '\f06b'; font-family: "Font Awesome 5 Free"; font-weight: 900; position: absolute; right: -20px; top: -20px; font-size: 150px; opacity: 0.1; transform: rotate(-15deg); }
+        
+        .refer-hero h2 { margin: 0 0 10px 0; font-size: 32px; font-weight: 800; letter-spacing: -0.5px;}
+        .refer-hero p { margin: 0 0 25px 0; font-size: 15px; opacity: 0.9; max-width: 600px; margin-inline: auto;}
+        
+        /* 🌟 PREMIUM REWARD BADGE 🌟 */
+        .reward-badge-pro {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 8px 25px 8px 10px; 
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            margin-bottom: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        .reward-badge-pro:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(246, 194, 62, 0.4);
+            border-color: rgba(246, 194, 62, 0.6);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .badge-icon-box {
+            background: linear-gradient(135deg, #f6c23e, #f4a200);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 18px;
+            color: #fff;
+            margin-right: 15px;
+            box-shadow: 0 0 15px rgba(246, 194, 62, 0.6);
+            animation: pulseGlow 2s infinite;
+        }
+        .badge-text {
+            font-size: 16px;
+            color: #fff;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+        .badge-text .highlight {
+            color: #ffdf70;
+            font-weight: 800;
+            text-shadow: 0 0 10px rgba(246, 194, 62, 0.5);
+            font-size: 18px;
+        }
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 0 0 rgba(246, 194, 62, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(246, 194, 62, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(246, 194, 62, 0); }
+        }
+
+        /* Link Box Area */
+        .link-box-wrapper { background: var(--bg-white); padding: 8px; border-radius: 50px; display: flex; align-items: center; max-width: 500px; margin: 0 auto; box-shadow: 0 5px 25px rgba(0,0,0,0.15); position: relative; z-index: 2; border: 2px solid rgba(255,255,255,0.8);}
+        .link-box-wrapper input { flex: 1; border: none; background: transparent; padding: 10px 20px; font-size: 15px; color: var(--text-dark); font-weight: 600; outline: none; font-family: 'Poppins', sans-serif;}
+        .btn-copy { background: var(--primary-blue); color: #fff; border: none; padding: 12px 25px; border-radius: 30px; font-weight: 600; cursor: pointer; transition: 0.3s; font-family: 'Poppins', sans-serif; display: flex; align-items: center; gap: 8px; font-size: 14px;}
+        .btn-copy:hover { background: #1cc88a; box-shadow: 0 5px 15px rgba(28, 200, 138, 0.4);}
+
+        /* Stats Section */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--bg-white); border: 1px solid var(--border-color); padding: 25px; border-radius: 12px; text-align: center; box-shadow: var(--shadow-sm); transition: 0.3s; }
+        .stat-card:hover { transform: translateY(-5px); border-color: var(--primary-blue); }
+        .stat-icon { font-size: 35px; color: var(--primary-blue); margin-bottom: 15px; }
+        .stat-card.yellow .stat-icon { color: #f6c23e; }
+        .stat-value { font-size: 30px; font-weight: 700; color: var(--text-dark); margin: 0; line-height: 1; }
+        .stat-label { font-size: 13px; color: var(--text-main); font-weight: 600; text-transform: uppercase; margin-top: 8px; }
+
+        /* Steps Section */
+        .section-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin-bottom: 20px; text-align: center; }
+        .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+        .step-card { background: var(--bg-white); border: 1px solid var(--border-color); padding: 25px; border-radius: 12px; text-align: center; position: relative; }
+        .step-number { width: 40px; height: 40px; background: var(--primary-blue); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; position: absolute; top: -15px; left: 50%; transform: translateX(-50%); border: 3px solid var(--bg-body); }
+        .step-card h4 { margin: 25px 0 10px 0; font-size: 16px; color: var(--text-dark); font-weight: 600;}
+        .step-card p { margin: 0; font-size: 13px; color: var(--text-main); line-height: 1.5; }
+
+        /* Share Options */
+        .share-options { display: flex; justify-content: center; gap: 15px; margin-top: 30px; }
+        .share-btn { width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 20px; color: #fff; cursor: pointer; transition: 0.3s; text-decoration: none; }
+        .share-btn:hover { transform: scale(1.1); }
+        .share-fb { background: #1877f2; box-shadow: 0 4px 10px rgba(24, 119, 242, 0.3); }
+        .share-wa { background: #25D366; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3); }
+        .share-tg { background: #0088cc; box-shadow: 0 4px 10px rgba(0, 136, 204, 0.3); }
+
+        /* 🌟 BOTTOM NAVIGATION 🌟 */
+        .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--bg-white); border-top: 1px solid var(--border-color); z-index: 1000; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom); }
+        .b-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); text-decoration: none; font-size: 12px; font-weight: 600; gap: 5px; width: 25%; transition: 0.3s; cursor: pointer; }
+        .b-nav-item i { font-size: 20px; }
+        .b-nav-item:hover { color: var(--primary-hover); }
+        .b-nav-item.active { color: var(--primary-blue); }
+        .b-nav-item.active i { transform: translateY(-2px); }
+
+        @media (max-width: 768px) {
+            .refer-hero h2 { font-size: 24px; }
+            .reward-badge-pro { padding: 6px 15px 6px 8px; }
+            .badge-icon-box { width: 30px; height: 30px; font-size: 14px; margin-right: 10px; }
+            .badge-text { font-size: 13px; }
+            .badge-text .highlight { font-size: 15px; }
+
+            .link-box-wrapper { flex-direction: column; border-radius: 12px; padding: 15px; gap: 10px; background: transparent; box-shadow: none; border: 1px solid rgba(255,255,255,0.3);}
+            .link-box-wrapper input { width: 100%; text-align: center; background: rgba(255,255,255,0.1); border-radius: 8px; color: #fff; padding: 12px; font-size: 13px;}
+            .btn-copy { width: 100%; justify-content: center; background: #fff; color: var(--primary-blue); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="mobile-brand"><i class="fas fa-play" style="color:var(--primary-blue);"></i> STZ</div>
+            <div class="user-info">
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="display-coins">...</span></div>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            <div class="container">
+                
+                <div class="refer-hero">
+                    <h2>Invite Friends & Earn More!</h2>
+                    <p>Invite your friends to STZ Exchange and get instant bonus coins when they register using your unique link.</p>
+                    
+                    <div class="reward-badge-pro">
+                        <div class="badge-icon-box">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="badge-text">
+                            <span class="highlight">Get 100 Coins</span> Per Referral!
+                        </div>
+                    </div>
+                    
+                    <div class="link-box-wrapper">
+                        <input type="text" id="referral-link" readonly value="Loading your unique link...">
+                        <button class="btn-copy" id="copy-btn" onclick="copyLink()"><i class="fas fa-copy"></i> Copy Link</button>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="fas fa-users"></i></div>
+                        <h3 class="stat-value" id="total-invites">0</h3>
+                        <div class="stat-label">Total Referrals</div>
+                    </div>
+                    <div class="stat-card yellow">
+                        <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                        <h3 class="stat-value" id="referral-earnings">0</h3>
+                        <div class="stat-label">Total Earned</div>
+                    </div>
+                </div>
+
+                <h3 class="section-title">How It Works?</h3>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h4>Copy Your Link</h4>
+                        <p>Copy your unique referral link generated specially for your account.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h4>Share with Friends</h4>
+                        <p>Share it via WhatsApp, Telegram, Facebook or anywhere online.</p>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">3</div>
+                        <h4>Earn Coins</h4>
+                        <p>When someone signs up, 100 bonus coins will be added instantly!</p>
+                    </div>
+                </div>
+
+                <div class="share-options">
+                    <a href="#" id="share-wa" target="_blank" class="share-btn share-wa" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <a href="#" id="share-tg" target="_blank" class="share-btn share-tg" title="Share on Telegram"><i class="fab fa-telegram-plane"></i></a>
+                    <a href="#" id="share-fb" target="_blank" class="share-btn share-fb" title="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="b-nav-item">
+            <i class="fas fa-home"></i> <span>Home</span>
+        </a>
+        <a href="surf.html" class="b-nav-item">
+            <i class="fas fa-mouse-pointer"></i> <span>Surf</span>
+        </a>
+        <a href="campaign.html" class="b-nav-item">
+            <i class="fas fa-plus-circle"></i> <span>Add Ad</span>
+        </a>
+        <a href="profile.html" class="b-nav-item">
+            <i class="fas fa-user"></i> <span>Profile</span>
+        </a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // 🌟 Initialize Telegram Web App
+        try {
+            const tg = window.Telegram.WebApp;
+            tg.expand(); 
+            tg.ready();
+        } catch(e) {
+            console.log("Not running inside Telegram");
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let myReferralLink = "";
+
+        // 🌟 SECURED AUTH CHECK 🌟
+        auth.onAuthStateChanged((user) => {
+            if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
+                
+                // Generate & Display Referral Link
+                const baseUrl = window.location.origin + window.location.pathname.replace('refer.html', 'index.html');
+                myReferralLink = baseUrl + "?ref=" + user.uid;
+                
+                document.getElementById('referral-link').value = myReferralLink;
+
+                // Update Social Share Links
+                const shareText = "Join STZ Exchange and earn free coins daily! Register here: ";
+                document.getElementById('share-wa').href = `https://wa.me/?text=${encodeURIComponent(shareText + myReferralLink)}`;
+                document.getElementById('share-tg').href = `https://t.me/share/url?url=${encodeURIComponent(myReferralLink)}&text=${encodeURIComponent("Join STZ Exchange & earn free coins!")}`;
+                document.getElementById('share-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(myReferralLink)}`;
+
+                // Fetch User Profile Data & Stats
+                db.ref('users/' + user.uid).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if(data) {
+                        document.getElementById('display-coins').innerText = data.coins || 0;
+                        document.getElementById('total-invites').innerText = data.totalReferrals || 0;
+                        document.getElementById('referral-earnings').innerText = data.referralEarnings || 0;
+                    }
+                });
+
+            } else {
+                window.location.href = "index.html"; 
+            }
+        });
+
+        // Copy Link Function
+        function copyLink() {
+            const copyText = document.getElementById("referral-link");
+            copyText.select();
+            copyText.setSelectionRange(0, 99999); // For mobile
+            document.execCommand("copy");
+
+            const copyBtn = document.getElementById("copy-btn");
+            const originalContent = copyBtn.innerHTML;
+            
+            copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            copyBtn.style.background = '#1cc88a'; 
+            copyBtn.style.color = '#fff';
+            
+            if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+                window.Telegram.WebApp.showAlert("✅ Link copied to clipboard!");
+            }
+
+            setTimeout(() => {
+                copyBtn.innerHTML = originalContent;
+                if (window.innerWidth <= 768) {
+                    copyBtn.style.background = '#fff';
+                    copyBtn.style.color = 'var(--primary-blue)';
+                } else {
+                    copyBtn.style.background = 'var(--primary-blue)';
+                    copyBtn.style.color = '#fff';
+                }
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

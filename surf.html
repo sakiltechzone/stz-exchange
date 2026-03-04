@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Surf Ads | STZ Exchange</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        /* --- Premium Light Theme Variables --- */
+        :root {
+            --primary-blue: #4e73df;
+            --primary-hover: #2e59d9;
+            --bg-body: #f8f9fc;
+            --bg-white: #ffffff;
+            --text-main: #5a5c69;
+            --text-dark: #3a3b45;
+            --text-light: #b7b9cc;
+            --border-color: #eaecf4;
+            --shadow-sm: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+        }
+
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100dvh; overflow: hidden; position: relative; }
+
+        /* --- Main Content Area (Full Width, No Sidebar) --- */
+        .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; position: relative; }
+
+        /* Top Header - ONLY BRAND AND COINS */
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 10; }
+        
+        .mobile-brand { display: flex; font-size: 20px; font-weight: 700; color: var(--text-dark); align-items: center; gap: 8px; }
+        
+        .user-info { display: flex; align-items: center; justify-content: flex-end; }
+        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 18px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 16px; border: 1px solid rgba(246, 194, 62, 0.5); }
+
+        /* --- Surf Body --- */
+        /* Fixed Padding so scroll content doesn't get cut off at the bottom nav */
+        .dashboard-body { padding: 25px 20px 90px 20px; overflow-y: auto; flex: 1; } 
+        
+        /* Ad Title Area */
+        .page-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px;}
+        .page-title { font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        .ad-counter-badge { background: var(--primary-blue); color: #fff; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); }
+
+        .surf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        
+        /* Pro Ad Card Design */
+        .surf-card { background: var(--bg-white); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; transition: 0.3s; position: relative; overflow: hidden; box-shadow: var(--shadow-sm);}
+        .surf-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary-blue); opacity: 0; transition: 0.3s; }
+        .surf-card:hover { transform: translateY(-3px); box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1); border-color: rgba(78, 115, 223, 0.3); }
+        .surf-card:hover::before { opacity: 1; }
+
+        .surf-card-icon { font-size: 30px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 15px; flex-shrink: 0; margin: 0 auto;}
+        .surf-card-details { flex: 1; width: 100%;}
+        .surf-card-details h4 { margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text-dark); line-height: 1.3;}
+        .time-badge { font-size: 11px; font-weight: 600; background: var(--bg-body); padding: 5px 10px; border-radius: 6px; color: var(--text-main); display: inline-block; margin-bottom: 8px; border: 1px solid var(--border-color); text-transform: uppercase;}
+        .text-gold { color: #f6c23e; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 5px;}
+        
+        .visit-btn { width: 100%; background: var(--primary-blue); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;}
+        .visit-btn:hover { background: var(--primary-hover); box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); transform: scale(1.02); }
+
+        /* Empty State */
+        .empty-state { text-align: center; padding: 50px 20px; color: var(--text-main); grid-column: 1 / -1; }
+        .empty-state i { font-size: 50px; color: var(--border-color); margin-bottom: 15px; }
+
+        /* --- PRO SURFING VIEW (Modal) for Timer Ads --- */
+        #surfing-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; flex-direction: column; }
+        .pro-timer-header { position: relative; height: 70px; background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 1px solid rgba(255,255,255,0.05); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .surf-brand { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 16px; color: #aaa; }
+        .surf-brand span { display: none; } /* Hidden on mobile */
+        .surf-brand i { color: #00ddff; font-size: 20px; }
+        .timer-center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .glowing-time { font-size: 24px; font-weight: bold; color: #00ddff; text-shadow: 0 0 15px rgba(0, 221, 255, 0.6); line-height: 1; margin-bottom: 3px; }
+        .status-text { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: bold; transition: 0.3s; }
+        
+        .claim-btn { display: none; background: linear-gradient(135deg, #1cc88a, #13855c); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 0 15px rgba(28, 200, 138, 0.4); animation: popIn 0.4s ease-out forwards; }
+        @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        
+        .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); }
+        .progress-fill { height: 100%; width: 100%; background: var(--primary-blue); transition: width 1s linear, background 0.3s; }
+        #ad-frame { flex: 1; width: 100%; border: none; background: #fff; }
+
+        /* 🌟 NEW TAB MESSAGE BOX (Only for Website Visit failsafes) 🌟 */
+        #new-tab-message { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; background: var(--bg-body); }
+        .new-tab-box { background: var(--bg-white); padding: 40px; border-radius: 15px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.05); max-width: 400px; width: 90%; border: 1px solid var(--border-color); }
+        .new-tab-box i { font-size: 60px; color: var(--primary-blue); margin-bottom: 20px; }
+        .new-tab-box h3 { color: var(--text-dark); margin: 0 0 10px 0; font-size: 20px; }
+        .new-tab-box p { color: var(--text-main); font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
+        .retry-btn { padding: 12px 25px; background: var(--warning); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0 auto; font-family: 'Poppins', sans-serif; transition: 0.3s;}
+
+        /* 🌟 BOTTOM NAVIGATION 🌟 */
+        .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--bg-white); border-top: 1px solid var(--border-color); z-index: 1000; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom); }
+        .b-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); text-decoration: none; font-size: 12px; font-weight: 600; gap: 5px; width: 25%; transition: 0.3s; cursor: pointer; }
+        .b-nav-item i { font-size: 20px; }
+        .b-nav-item:hover { color: var(--primary-hover); }
+        .b-nav-item.active { color: var(--primary-blue); }
+        .b-nav-item.active i { transform: translateY(-2px); }
+
+    </style>
+</head>
+<body>
+
+    <div id="surfing-view">
+        <div class="pro-timer-header">
+            <div class="surf-brand"><i class="fas fa-play"></i></div>
+            <div class="timer-center">
+                <div class="glowing-time" id="timer-text">00</div>
+                <div class="status-text" id="reward-status">Viewing Content...</div>
+            </div>
+            <button class="claim-btn" id="close-btn" onclick="closeSurfer()"><i class="fas fa-check-circle"></i> Claim</button>
+            <div class="progress-container"><div class="progress-fill" id="progress-line"></div></div>
+        </div>
+        
+        <iframe id="ad-frame" src="" style="display: none;"></iframe>
+        
+        <div id="new-tab-message">
+            <div class="new-tab-box">
+                <i class="fas fa-external-link-square-alt"></i>
+                <h3>Task Opened in New Tab</h3>
+                <p>Please complete the required task. <b>Do not close this window</b> until the timer finishes to claim your reward!</p>
+                <button class="retry-btn" onclick="window.open(currentAdUrl, '_blank')"><i class="fas fa-redo"></i> Click here if it didn't open</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-header">
+            <div class="mobile-brand"><i class="fas fa-play" style="color:var(--primary-blue);"></i> STZ</div>
+            <div class="user-info">
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">...</span></div>
+            </div>
+        </div>
+
+        <div class="dashboard-body">
+            
+            <div class="page-header-flex">
+                <h2 class="page-title"><i class="fas fa-mouse-pointer" style="color: var(--primary-blue);"></i> Available Ads</h2>
+                <div class="ad-counter-badge">Available: <span id="ad-count">0</span></div>
+            </div>
+            
+            <div class="surf-grid" id="ads-container">
+                <div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #888;">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 30px; color: var(--primary-blue);"></i>
+                    <p style="margin-top: 15px;">Loading available campaigns...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="dashboard.html" class="b-nav-item">
+            <i class="fas fa-home"></i> <span>Home</span>
+        </a>
+        <a href="surf.html" class="b-nav-item active">
+            <i class="fas fa-mouse-pointer"></i> <span>Surf</span>
+        </a>
+        <a href="campaign.html" class="b-nav-item">
+            <i class="fas fa-plus-circle"></i> <span>Add Ad</span>
+        </a>
+        <a href="profile.html" class="b-nav-item">
+            <i class="fas fa-user"></i> <span>Profile</span>
+        </a>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // 🌟 Initialize Telegram Web App
+        try {
+            const tg = window.Telegram.WebApp;
+            tg.expand(); 
+            tg.ready();
+        } catch(e) {
+            console.log("Not running inside Telegram");
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
+            authDomain: "stz-exchange.firebaseapp.com",
+            projectId: "stz-exchange",
+            storageBucket: "stz-exchange.firebasestorage.app",
+            messagingSenderId: "855972947902",
+            appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
+        };
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.database();
+
+        let currentUser = null;
+        let viewedAds = {}; 
+
+        auth.onAuthStateChanged((user) => {
+            if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
+                currentUser = user;
+                db.ref('users/' + user.uid).on('value', s => {
+                    const data = s.val();
+                    if(data) {
+                        document.getElementById('bal').innerText = data.coins || 0;
+                        viewedAds = data.viewedAds || {}; 
+                        loadCampaigns(); 
+                    }
+                });
+            } else { 
+                window.location.href="index.html"; 
+            }
+        });
+
+        // --- LOAD DYNAMIC CAMPAIGNS ---
+        function loadCampaigns() {
+            db.ref('campaigns').on('value', snapshot => {
+                const container = document.getElementById('ads-container');
+                container.innerHTML = '';
+                let adCount = 0;
+
+                snapshot.forEach(childSnapshot => {
+                    const camp = childSnapshot.val();
+                    const campId = childSnapshot.key;
+
+                    if (camp.status === 'active' && 
+                        (camp.viewsCompleted || 0) < camp.totalViews && 
+                        !viewedAds[campId]) {
+                        
+                        if (camp.uid === currentUser.uid) {
+                            return; 
+                        }
+
+                        adCount++;
+                        const rewardCoins = camp.costPerView || camp.duration;
+                        
+                        let iconPrefix = 'fas';
+                        let iconClass = 'fa-globe';
+                        let iconBg = 'rgba(78, 115, 223, 0.1)';
+                        let iconColor = 'var(--primary-blue)';
+                        let isInstant = false;
+                        
+                        if(camp.category === 'YouTube') {
+                            iconPrefix = 'fab'; iconClass = 'fa-youtube'; iconColor = '#ff0000'; iconBg = 'rgba(255, 0, 0, 0.1)'; isInstant = true;
+                        } else if(camp.category === 'Facebook') {
+                            iconPrefix = 'fab'; iconClass = 'fa-facebook'; iconColor = '#1877F2'; iconBg = 'rgba(24, 119, 242, 0.1)'; isInstant = true;
+                        } else if(camp.category === 'App Download') {
+                            iconPrefix = 'fab'; iconClass = 'fa-google-play'; iconColor = '#3DDC84'; iconBg = 'rgba(61, 220, 132, 0.1)'; isInstant = true;
+                        } else if(camp.category === 'Sign Up') {
+                            iconPrefix = 'fas'; iconClass = 'fa-user-plus'; iconColor = '#f6c23e'; iconBg = 'rgba(246, 194, 62, 0.1)'; isInstant = true;
+                        } else if(camp.category === 'Video Ad') {
+                            iconPrefix = 'fas'; iconClass = 'fa-video'; iconColor = '#ff0000'; iconBg = 'rgba(255, 0, 0, 0.1)';
+                        }
+
+                        let timerValue = isNaN(camp.duration) ? 60 : camp.duration;
+                        let displayDuration = isInstant ? "Instant Check" : `${timerValue} Secs`;
+                        let timeIcon = isInstant ? '<i class="fas fa-bolt" style="color:#f6c23e;"></i>' : '<i class="far fa-clock"></i>';
+
+                        const adHtml = `
+                            <div class="surf-card" id="card-${campId}">
+                                <div class="surf-card-icon" style="color: ${iconColor}; background: ${iconBg};">
+                                    <i class="${iconPrefix} ${iconClass}"></i>
+                                </div>
+                                <div class="surf-card-details">
+                                    <h4>${camp.title}</h4>
+                                    <div class="time-badge"><i class="fas fa-tag"></i> ${camp.category || 'Website Visit'} • ${timeIcon} ${displayDuration}</div>
+                                    <div class="text-gold"><i class="fas fa-coins"></i> +${rewardCoins} Coins</div>
+                                </div>
+                                <button class="visit-btn" onclick="openSurfer('${campId}', '${camp.url}', ${rewardCoins}, ${timerValue}, '${camp.category || 'Website Visit'}')">
+                                    <span>Start Earning</span> <i class="fas fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        `;
+                        container.innerHTML += adHtml;
+                    }
+                });
+
+                document.getElementById('ad-count').innerText = adCount;
+
+                if (adCount === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-check-double" style="color: #1cc88a;"></i>
+                            <h3 style="color: var(--text-dark); margin:0;">All Caught Up!</h3>
+                            <p>You have viewed all available ads. Please check back later for new campaigns.</p>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // --- 🌟 BYPASS SYSTEM & TIMER SYSTEM 🌟 ---
+        let currentReward = 0;
+        let currentCampaignId = null;
+        let currentAdUrl = "";
+        let surfInterval;
+
+        function openSurfer(campId, url, reward, totalSeconds, category) {
+            currentCampaignId = campId;
+            currentReward = reward;
+            currentAdUrl = url;
+
+            // 🌟 1. NO TIMER CATEGORIES (Instant Reward & Direct Link)
+            if (category === 'YouTube' || category === 'Facebook' || category === 'App Download' || category === 'Sign Up') {
+                
+                window.open(url, '_blank'); 
+                
+                db.ref('users/' + currentUser.uid).transaction(data => {
+                    if(data) {
+                        data.coins = (data.coins || 0) + currentReward;
+                        data.totalSurfed = (data.totalSurfed || 0) + 1;
+                        if (!data.viewedAds) data.viewedAds = {};
+                        data.viewedAds[currentCampaignId] = true; 
+                    }
+                    return data;
+                }).then(() => {
+                    db.ref('campaigns/' + currentCampaignId).transaction(camp => {
+                        if(camp) {
+                            camp.viewsCompleted = (camp.viewsCompleted || 0) + 1;
+                            if(camp.viewsCompleted >= camp.totalViews) {
+                                camp.status = 'completed';
+                            }
+                        }
+                        return camp;
+                    });
+                    
+                    if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+                        window.Telegram.WebApp.showAlert(`✅ Instant Reward: +${currentReward} Coins added!`);
+                    }
+                });
+                
+                return; 
+            }
+
+            // 🌟 2. TIMER CATEGORIES (Website Visit & Video Ad Only)
+            const view = document.getElementById('surfing-view');
+            const frame = document.getElementById('ad-frame');
+            const newTabMsg = document.getElementById('new-tab-message');
+            const timerText = document.getElementById('timer-text');
+            const status = document.getElementById('reward-status');
+            const closeBtn = document.getElementById('close-btn');
+            const progressLine = document.getElementById('progress-line');
+
+            let isEmbeddable = true;
+            if(url.includes("facebook.com") || url.includes("fb.watch") || url.includes("play.google.com") || url.includes("instagram.com") || url.includes("t.me")) {
+                isEmbeddable = false; 
+            }
+
+            view.style.display = 'flex';
+            status.innerText = "PLEASE WAIT...";
+            status.style.color = "#888";
+            timerText.style.color = "#00ddff";
+            timerText.style.textShadow = "0 0 15px rgba(0, 221, 255, 0.6)";
+            progressLine.style.background = "var(--primary-blue)";
+            closeBtn.style.display = "none";
+
+            if (isEmbeddable) {
+                frame.src = url;
+                frame.style.display = 'block';
+                newTabMsg.style.display = 'none';
+            } else {
+                frame.src = "";
+                frame.style.display = 'none';
+                newTabMsg.style.display = 'flex';
+                window.open(url, '_blank'); 
+            }
+
+            let timeLeft = parseInt(totalSeconds);
+            timerText.innerText = timeLeft;
+            progressLine.style.width = "100%";
+
+            surfInterval = setInterval(() => {
+                timeLeft--;
+                timerText.innerText = timeLeft;
+                
+                let percentage = (timeLeft / totalSeconds) * 100;
+                progressLine.style.width = percentage + "%";
+
+                if(timeLeft <= 0) {
+                    clearInterval(surfInterval);
+                    timerText.innerText = "0";
+                    progressLine.style.width = "0%";
+                    giveReward(status, timerText, closeBtn, progressLine);
+                }
+            }, 1000);
+        }
+
+        // Reward function for Timer-based tasks
+        function giveReward(status, timerText, closeBtn, progressLine) {
+            db.ref('users/' + currentUser.uid).transaction(data => {
+                if(data) {
+                    data.coins = (data.coins || 0) + currentReward;
+                    data.totalSurfed = (data.totalSurfed || 0) + 1;
+                    if (!data.viewedAds) data.viewedAds = {};
+                    data.viewedAds[currentCampaignId] = true; 
+                }
+                return data;
+            }).then(() => {
+                
+                db.ref('campaigns/' + currentCampaignId).transaction(camp => {
+                    if(camp) {
+                        camp.viewsCompleted = (camp.viewsCompleted || 0) + 1;
+                        if(camp.viewsCompleted >= camp.totalViews) {
+                            camp.status = 'completed';
+                        }
+                    }
+                    return camp;
+                }).then(() => {
+                    status.innerText = `SUCCESS! +${currentReward} COINS`;
+                    status.style.color = "#1cc88a";
+                    timerText.innerHTML = '<i class="fas fa-check"></i>';
+                    timerText.style.color = "#1cc88a";
+                    progressLine.style.background = "#1cc88a";
+                    progressLine.style.width = "100%"; 
+                    closeBtn.style.display = "block"; 
+                });
+
+            });
+        }
+
+        function closeSurfer() {
+            clearInterval(surfInterval);
+            document.getElementById('surfing-view').style.display = 'none';
+            document.getElementById('ad-frame').src = "";
+            document.getElementById('new-tab-message').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
