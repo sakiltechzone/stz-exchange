@@ -107,7 +107,7 @@
                 <div class="earn-card bonus">
                     <i class="fas fa-gift earn-icon"></i>
                     <h3>Daily Bonus</h3>
-                    <p>Claim your free coins every 24 hours.</p>
+                    <p>Watch an ad to claim your coins every 24 hours.</p>
                     <button class="action-btn btn-green" id="bonus-btn" disabled><i class="fas fa-spinner fa-spin"></i> Loading...</button>
                 </div>
 
@@ -295,11 +295,42 @@
 
         function claimBonus() {
             const btn = document.getElementById('bonus-btn');
+            
+            // Check if AdsGram is initialized
+            if (!AdController) {
+                // Fallback: If no Adsgram ID is set in the admin panel, just give the bonus directly.
+                processBonusReward();
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading Ad...';
+
+            AdController.show().then((result) => {
+                // Ad watched successfully! Now give the bonus.
+                processBonusReward();
+            }).catch((result) => {
+                // User skipped the ad or ad failed to load
+                console.log("AdsGram Error/Skip for Daily Bonus:", result);
+                if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
+                    window.Telegram.WebApp.showAlert("⚠️ Ad skipped or failed. Please watch the full video ad to claim your bonus.");
+                } else {
+                    alert("⚠️ Ad skipped or failed. Please watch the full video ad to claim your bonus.");
+                }
+                
+                // Reset button so they can click again
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-gift"></i> Claim ${dailyBonusReward} Coins`;
+            });
+        }
+
+        function processBonusReward() {
+            const btn = document.getElementById('bonus-btn');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
             currentUserRef.update({
-                coins: currentCoins + dailyBonusReward, // Updated dynamically
+                coins: currentCoins + dailyBonusReward, 
                 lastBonusTime: firebase.database.ServerValue.TIMESTAMP
             }).then(() => {
                 if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
