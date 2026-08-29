@@ -1,23 +1,27 @@
 export default async function handler(req, res) {
-    const query = req.query || {};
-    const body = (typeof req.body === 'object' && req.body !== null) ? req.body : {};
-    const data = { ...query, ...body };
+    let data = {};
 
-    // ১. যেকোনো প্যারামিটার থেকে SubID বের করা
-    const subId = data.subId || data.sub_id || data.user_id || data.userId || data.uid || data.subid || data.custom;
-
-    // ২. রিওয়ার্ড বা পেআউট কনভার্ট করা
-    let coinsToAdd = 0;
-    if (data.reward && !isNaN(parseFloat(data.reward)) && parseFloat(data.reward) > 0) {
-        coinsToAdd = parseFloat(data.reward);
-    } else if (data.amount && !isNaN(parseFloat(data.amount)) && parseFloat(data.amount) > 0) {
-        coinsToAdd = parseFloat(data.amount);
-    } else if (data.coins && !isNaN(parseFloat(data.coins)) && parseFloat(data.coins) > 0) {
-        coinsToAdd = parseFloat(data.coins);
-    } else if (data.payout && !isNaN(parseFloat(data.payout))) {
-        const p = parseFloat(data.payout);
-        coinsToAdd = p >= 1 ? p : Math.round(p * 20000);
+    // 🌟 GET, JSON POST এবং Form POST সব ফরম্যাট হ্যান্ডল করা 🌟
+    if (req.method === 'GET') {
+        data = req.query || {};
+    } else {
+        if (typeof req.body === 'string') {
+            try {
+                // JSON অথবা URL-encoded বডি পার্স করা
+                data = JSON.parse(req.body);
+            } catch (e) {
+                const parsed = new URLSearchParams(req.body);
+                data = Object.fromEntries(parsed.entries());
+            }
+        } else if (typeof req.body === 'object' && req.body !== null) {
+            data = req.body;
+        }
     }
+
+    // ডকুমেন্টেশন অনুযায়ী প্যারামিটার ধরা
+    const subId = data.subId || data.sub_id || data.user_id || req.query.subId;
+    const rawReward = data.reward || data.amount || data.coins || req.query.reward;
+    const coinsToAdd = parseFloat(rawReward);
 
     if (!subId || isNaN(coinsToAdd) || coinsToAdd <= 0) {
         return res.status(200).send("1");
@@ -27,15 +31,15 @@ export default async function handler(req, res) {
     const FIREBASE_DB_URL = "https://stz-exchange-default-rtdb.firebaseio.com";
 
     try {
-        // ফায়ারবেস থেকে বর্তমান ব্যালেন্স নেওয়া
+        // ১. ফায়ারবেস থেকে আগের কয়েন আনা
         const getRes = await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json?auth=${FIREBASE_SECRET}`);
         const currentData = await getRes.json();
         const currentCoins = typeof currentData === 'number' ? currentData : 0;
 
-        // নতুন ব্যালেন্স হিসাব
+        // ২. নতুন কয়েন যোগ করা
         const newBalance = Math.round(currentCoins + coinsToAdd);
 
-        // ফায়ারবেসে ব্যালেন্স সেভ করা
+        // ৩. ফায়ারবেসে কয়েন আপডেট করা
         await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json?auth=${FIREBASE_SECRET}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
