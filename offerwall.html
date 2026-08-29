@@ -214,11 +214,12 @@
             }
         });
 
-        function loadOfferwall(uid) {
-            const apiKey = "us9yiztefqoxgocfy5e5lsx5vpfjt6";
-            const iframe = document.getElementById('offerwall-frame');
-            iframe.src = `https://offerwallmedia.com/offerwall/${apiKey}/?user_id=${uid}`;
-        }
+        // সংশোধিত কোড:
+function loadOfferwall(uid) {
+    const apiKey = "us9yiztefqoxgocfy5e5lsx5vpfjt6";
+    const iframe = document.getElementById('offerwall-frame');
+    iframe.src = `https://offerwallmedia.com/offerwall/${apiKey}/?sub_id=${uid}`;
+}
 
         function onFrameLoaded() {
             document.getElementById('frame-loader').style.display = 'none';
