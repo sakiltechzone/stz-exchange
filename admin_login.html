@@ -184,7 +184,6 @@
         .security-badge i {
             color: #10b981;
         }
-
     </style>
 </head>
 <body>
@@ -202,26 +201,28 @@
                 <i class="fas fa-exclamation-circle"></i> <span id="error-text">Invalid credentials.</span>
             </div>
 
-            <div class="input-group">
-                <div class="input-wrapper">
-                    <div class="input-icon"><i class="fas fa-envelope"></i></div>
-                    <input type="email" id="admin-email" class="custom-input" placeholder="Admin Email Address">
+            <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon"><i class="fas fa-envelope"></i></div>
+                        <input type="email" id="admin-email" class="custom-input" placeholder="Admin Email Address" required>
+                    </div>
                 </div>
-            </div>
 
-            <div class="input-group">
-                <div class="input-wrapper">
-                    <div class="input-icon"><i class="fas fa-lock"></i></div>
-                    <input type="password" id="admin-pass" class="custom-input" placeholder="Secure Password">
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <div class="input-icon"><i class="fas fa-lock"></i></div>
+                        <input type="password" id="admin-pass" class="custom-input" placeholder="Secure Password" required>
+                    </div>
                 </div>
-            </div>
 
-            <button class="login-btn" id="login-btn" onclick="loginAdmin()">
-                <span>Access Portal</span> <i class="fas fa-sign-in-alt"></i>
-            </button>
+                <button type="submit" class="login-btn" id="login-btn">
+                    <span>Access Portal</span> <i class="fas fa-sign-in-alt"></i>
+                </button>
+            </form>
 
             <div class="security-badge">
-                <i class="fas fa-shield-check"></i> End-to-end Encrypted Connection
+                <i class="fas fa-shield-alt"></i> End-to-end Encrypted Connection
             </div>
 
         </div>
@@ -248,17 +249,19 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // ðŸŒŸ YOUR EXACT ADMIN EMAIL HERE ðŸŒŸ
+        // 🌟 MASTER ADMIN EMAIL 🌟
         const MASTER_ADMIN_EMAIL = "sakilmolla210@gmail.com"; 
 
-        // Check if already logged in securely
+        // 🌟 SECURE AUTO-LOGIN CHECK 🌟
         auth.onAuthStateChanged(user => {
-            if(user && localStorage.getItem('stz_admin_login') === 'true') {
+            if (user && user.email && user.email.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase() && localStorage.getItem('stz_admin_login') === 'true') {
                 window.location.href = "admin_dashboard.html";
             }
         });
 
-        function loginAdmin() {
+        function handleAdminLogin(e) {
+            e.preventDefault();
+
             const email = document.getElementById('admin-email').value.trim();
             const password = document.getElementById('admin-pass').value.trim();
             const errorBox = document.getElementById('error-message');
@@ -273,7 +276,7 @@
                 return;
             }
 
-            // 1. Check if the entered email is actually the admin's email
+            // 1. Check Master Admin Email
             if (email.toLowerCase() !== MASTER_ADMIN_EMAIL.toLowerCase()) {
                 errorText.innerText = "Access Denied. You are not an admin.";
                 errorBox.style.display = 'block';
@@ -283,11 +286,21 @@
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
 
+            // 2. Authenticate with Firebase
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // 2. Set the Secure Admin Session
-                    localStorage.setItem('stz_admin_login', 'true');
-                    window.location.href = "admin_dashboard.html";
+                    const loggedInUser = userCredential.user;
+                    if (loggedInUser && loggedInUser.email.toLowerCase() === MASTER_ADMIN_EMAIL.toLowerCase()) {
+                        localStorage.setItem('stz_admin_login', 'true');
+                        window.location.href = "admin_dashboard.html";
+                    } else {
+                        auth.signOut();
+                        localStorage.removeItem('stz_admin_login');
+                        btn.disabled = false;
+                        btn.innerHTML = '<span>Access Portal</span> <i class="fas fa-sign-in-alt"></i>';
+                        errorText.innerText = "Unauthorized access attempt detected.";
+                        errorBox.style.display = 'block';
+                    }
                 })
                 .catch((error) => {
                     btn.disabled = false;
