@@ -241,7 +241,7 @@
                             </div>
                             <div class="method-details">
                                 <h4>Binance</h4>
-                                <p>Min: $1.00 (1,000 Coins)</p>
+                                <p>Min: $1.00 (50,000 Coins)</p>
                             </div>
                         </div>
 
@@ -256,7 +256,7 @@
                             </div>
                             <div class="method-details">
                                 <h4>PhonePe (UPI)</h4>
-                                <p>Min: ₹100 (1,111 Coins)</p>
+                                <p>Min: ₹50 (27,778 Coins)</p>
                             </div>
                         </div>
 
@@ -271,7 +271,7 @@
                             </div>
                             <div class="method-details">
                                 <h4>bKash Personal</h4>
-                                <p>Min: ৳100 (833 Coins)</p>
+                                <p>Min: ৳50 (20,833 Coins)</p>
                             </div>
                         </div>
 
@@ -285,7 +285,7 @@
                             </div>
                             <div class="method-details">
                                 <h4>Nagad Personal</h4>
-                                <p>Min: ৳100 (833 Coins)</p>
+                                <p>Min: ৳50 (20,833 Coins)</p>
                             </div>
                         </div>
 
@@ -302,18 +302,18 @@
                         <div class="form-group">
                             <label>Coins to Withdraw</label>
                             <div class="input-wrap">
-                                <input type="number" id="withdraw-coins" min="1" placeholder="Enter coins (e.g. 1000)" oninput="calculateExchange()" required>
+                                <input type="number" id="withdraw-coins" min="1" placeholder="Enter coins (e.g. 50000)" oninput="calculateExchange()" required>
                             </div>
                         </div>
 
                         <div class="rate-preview-box">
                             <div class="rate-row">
                                 <span>Exchange Rate:</span>
-                                <span id="rate-display">1,000 Coins = $1.00 USD</span>
+                                <span id="rate-display">50,000 Coins = $1.00 USD</span>
                             </div>
                             <div class="rate-row">
                                 <span>Minimum Threshold:</span>
-                                <span id="min-limit-display">1,000 Coins ($1.00 USD)</span>
+                                <span id="min-limit-display">50,000 Coins ($1.00 USD)</span>
                             </div>
                             <div class="rate-row">
                                 <span>You Will Receive:</span>
@@ -364,38 +364,38 @@
         let userCurrentCoins = 0;
         let selectedMethodKey = 'binance';
 
-        // 🌟 কনভার্সন রেট ও শর্তাবলী 🌟
+        // 🌟 নতুন 50,000 Coins = $1.00 USD ভিত্তিক রেট কনফিগ 🌟
         const METHOD_CONFIG = {
             binance: {
                 name: "Binance",
                 currency: "USD",
                 symbol: "$",
-                minCoin: 1000,
+                minCoin: 50000,
                 minFiat: "$1.00 USD",
-                rateText: "1,000 Coins = $1.00 USD",
-                ratePerCoin: 0.001, // 1/1000
-                inputPlaceholder: "Pay ID / UID",
+                rateText: "50,000 Coins = $1.00 USD",
+                ratePerCoin: 0.00002, // 1 / 50000
+                inputPlaceholder: "Enter Binance Pay ID / UID",
                 label: "Binance Pay ID / UID"
             },
             phonepe: {
                 name: "PhonePe (UPI)",
                 currency: "INR",
                 symbol: "₹",
-                minCoin: 1111,
-                minFiat: "₹100 INR",
-                rateText: "1,000 Coins = ₹90.00 INR",
-                ratePerCoin: 0.09,
-                inputPlaceholder: "Enter PhonePe UPI ID (e.g. 9876543210@ybl)",
+                minCoin: 27778,
+                minFiat: "₹50.00 INR",
+                rateText: "50,000 Coins = ₹90.00 INR",
+                ratePerCoin: 0.0018, // 90 / 50000
+                inputPlaceholder: "Enter PhonePe UPI ID (e.g. name@ybl)",
                 label: "PhonePe UPI ID / Mobile Number"
             },
             bkash: {
                 name: "bKash Personal",
                 currency: "BDT",
                 symbol: "৳",
-                minCoin: 833,
-                minFiat: "৳100 BDT",
-                rateText: "1,000 Coins = ৳120.00 BDT",
-                ratePerCoin: 0.12,
+                minCoin: 20833,
+                minFiat: "৳50.00 BDT",
+                rateText: "50,000 Coins = ৳120.00 BDT",
+                ratePerCoin: 0.0024, // 120 / 50000
                 inputPlaceholder: "Enter 11-digit bKash Personal Number",
                 label: "bKash Personal Account Number"
             },
@@ -403,10 +403,10 @@
                 name: "Nagad Personal",
                 currency: "BDT",
                 symbol: "৳",
-                minCoin: 833,
-                minFiat: "৳100 BDT",
-                rateText: "1,000 Coins = ৳120.00 BDT",
-                ratePerCoin: 0.12,
+                minCoin: 20833,
+                minFiat: "৳50.00 BDT",
+                rateText: "50,000 Coins = ৳120.00 BDT",
+                ratePerCoin: 0.0024, // 120 / 50000
                 inputPlaceholder: "Enter 11-digit Nagad Personal Number",
                 label: "Nagad Personal Account Number"
             }
@@ -417,11 +417,11 @@
             if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
                 currentUser = user;
                 
-                // Realtime Coin & USD Listener
+                // Realtime Coin & USD Listener ($1 = 50,000 coins হিসেবে হেডার আপডেট)
                 db.ref('users/' + user.uid + '/coins').on('value', s => {
                     userCurrentCoins = s.val() || 0;
                     document.getElementById('header-coins').innerText = userCurrentCoins.toLocaleString();
-                    document.getElementById('header-usd').innerText = (userCurrentCoins / 1000).toFixed(2);
+                    document.getElementById('header-usd').innerText = (userCurrentCoins / 50000).toFixed(2);
                 });
 
                 loadWithdrawHistory(user.uid);
@@ -435,11 +435,9 @@
             selectedMethodKey = method;
             const config = METHOD_CONFIG[method];
 
-            // UI Cards active class
             document.querySelectorAll('.method-card').forEach(c => c.classList.remove('selected'));
             document.getElementById(`card-${method}`).classList.add('selected');
 
-            // Update Labels & Placeholders
             document.getElementById('account-label').innerText = config.label;
             document.getElementById('wallet-address').placeholder = config.inputPlaceholder;
             document.getElementById('rate-display').innerText = config.rateText;
