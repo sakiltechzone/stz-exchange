@@ -1,32 +1,42 @@
 export default async function handler(req, res) {
     let data = {};
 
-    // ১. GET, JSON বডি এবং Form-data বডি সব পার্স করা
-    if (req.method === 'GET') {
-        data = req.query || {};
-    } else {
-        if (typeof req.body === 'string') {
+    // কুয়েরি প্যারামিটার যুক্ত করা
+    if (req.query && typeof req.query === 'object') {
+        data = { ...req.query };
+    }
+
+    // বডি পার্সিং (JSON, Form-Data, Text)
+    if (req.body) {
+        if (typeof req.body === 'object') {
+            data = { ...data, ...req.body };
+        } else if (typeof req.body === 'string') {
             try {
-                data = JSON.parse(req.body);
+                const parsedJson = JSON.parse(req.body);
+                data = { ...data, ...parsedJson };
             } catch (e) {
-                const parsed = new URLSearchParams(req.body);
-                data = Object.fromEntries(parsed.entries());
+                try {
+                    const parsedUrl = new URLSearchParams(req.body);
+                    for (const [key, value] of parsedUrl.entries()) {
+                        data[key] = value;
+                    }
+                } catch (err) {}
             }
-        } else if (typeof req.body === 'object' && req.body !== null) {
-            data = req.body;
         }
     }
 
-    // ২. SubID বের করা (Query ও Body উভয় থেকেই)
-    const subId = data.subId || data.sub_id || data.user_id || data.userId || data.uid || req.query.subId || req.query.uid;
+    // SubID নির্ধারণ
+    const subId = data.subId || data.sub_id || data.user_id || data.userId || data.uid || data.subid || (req.query && req.query.subId);
 
-    // ৩. রিওয়ার্ড/পেআউট প্যারামিটার হ্যান্ডলিং
-    let rawVal = data.reward || data.amount || data.payout || data.coins || req.query.reward || req.query.payout;
+    // রিওয়ার্ড / পেআউট মান নির্ধারণ
+    const rawVal = data.reward || data.amount || data.payout || data.coins || (req.query && (req.query.reward || req.query.payout));
     let coinsToAdd = parseFloat(rawVal);
 
-    // যদি পেআউট সরাসরি ছোট ডলার সংখ্যা হয় (যেমন: 0.002 বা 1 এর নিচে), তবে ২০,০০০ এক্সচেঞ্জ রেটে কয়েনে রূপান্তর
+    // ছোট ডলার ভ্যালু আসলে কয়েনে কনভার্ট করা
     if (!isNaN(coinsToAdd) && coinsToAdd > 0 && coinsToAdd < 1 && !data.reward) {
         coinsToAdd = Math.round(coinsToAdd * 20000);
+    } else if (!isNaN(coinsToAdd)) {
+        coinsToAdd = Math.round(coinsToAdd);
     }
 
     if (!subId || isNaN(coinsToAdd) || coinsToAdd <= 0) {
@@ -37,16 +47,18 @@ export default async function handler(req, res) {
     const FIREBASE_DB_URL = "https://stz-exchange-default-rtdb.firebaseio.com";
 
     try {
-        // ফায়ারবেস থেকে আগের ব্যালেন্স রিড করা
-        const getRes = await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json?auth=${FIREBASE_SECRET}`);
+        // ১. বর্তমান কয়েন রিড করা
+        const getUrl = `${FIREBASE_DB_URL}/users/${encodeURIComponent(subId)}/coins.json?auth=${FIREBASE_SECRET}`;
+        const getRes = await fetch(getUrl);
         const currentData = await getRes.json();
-        const currentCoins = typeof currentData === 'number' ? currentData : 0;
+        const currentCoins = (typeof currentData === 'number') ? currentData : 0;
 
-        // নতুন কয়েন যোগ
-        const newBalance = Math.round(currentCoins + coinsToAdd);
+        // ২. নতুন কয়েন হিসাব
+        const newBalance = currentCoins + coinsToAdd;
 
-        // ফায়ারবেসে রাইট করা
-        await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json?auth=${FIREBASE_SECRET}`, {
+        // ৩. ফায়ারবেসে সেভ করা
+        const putUrl = `${FIREBASE_DB_URL}/users/${encodeURIComponent(subId)}/coins.json?auth=${FIREBASE_SECRET}`;
+        await fetch(putUrl, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newBalance)
