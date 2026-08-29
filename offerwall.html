@@ -219,12 +219,12 @@
         });
 
         function loadOfferwall(uid) {
-            const apiKey = "us9yiztefqoxgocfy5e5lsx5vpfjt6";
-            const iframe = document.getElementById('offerwall-frame');
-            
-            // স্ল্যাশ ছাড়া সরাসরি প্যারামিটার পাঠানো
-            iframe.src = "https://offerwallmedia.com/offerwall/" + apiKey + "?sub_id=" + encodeURIComponent(uid);
-        }
+    const apiKey = "us9yiztefqoxgocfy5e5lsx5vpfjt6";
+    const iframe = document.getElementById('offerwall-frame');
+    
+    // OfferwallMedia এর সঠিক পাথ ফরম্যাট
+    iframe.src = `https://offerwallmedia.com/offerwall/${apiKey}/${encodeURIComponent(uid)}`;
+}
 
         function onFrameLoaded() {
             document.getElementById('frame-loader').style.display = 'none';
