@@ -1,44 +1,59 @@
+// কাঁচা বডি রিড করার হেল্পার
+async function getRawBody(readable) {
+    const chunks = [];
+    for await (const chunk of readable) {
+        chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+    }
+    return Buffer.concat(chunks).toString('utf8');
+}
+
 export default async function handler(req, res) {
     let data = {};
 
-    // কুয়েরি প্যারামিটার যুক্ত করা
+    // ১. GET কোয়েরি থাকলে নেওয়া
     if (req.query && typeof req.query === 'object') {
-        data = { ...req.query };
+        data = { ...data, ...req.query };
     }
 
-    // বডি পার্সিং (JSON, Form-Data, Text)
-    if (req.body) {
-        if (typeof req.body === 'object') {
+    // ২. POST বডি পার্সিং (Vercel-এর কাঁচা রিকোয়েস্ট থেকে সরাসরি পড়া)
+    try {
+        let rawBody = "";
+        if (typeof req.body === 'object' && req.body !== null) {
             data = { ...data, ...req.body };
-        } else if (typeof req.body === 'string') {
+        } else if (typeof req.body === 'string' && req.body.length > 0) {
+            rawBody = req.body;
+        } else {
+            rawBody = await getRawBody(req);
+        }
+
+        if (rawBody) {
             try {
-                const parsedJson = JSON.parse(req.body);
+                const parsedJson = JSON.parse(rawBody);
                 data = { ...data, ...parsedJson };
             } catch (e) {
-                try {
-                    const parsedUrl = new URLSearchParams(req.body);
-                    for (const [key, value] of parsedUrl.entries()) {
-                        data[key] = value;
-                    }
-                } catch (err) {}
+                const searchParams = new URLSearchParams(rawBody);
+                for (const [key, value] of searchParams.entries()) {
+                    data[key] = value;
+                }
             }
         }
-    }
+    } catch (e) {}
 
-    // SubID নির্ধারণ
+    // ৩. SubID বের করা
     const subId = data.subId || data.sub_id || data.user_id || data.userId || data.uid || data.subid || (req.query && req.query.subId);
 
-    // রিওয়ার্ড / পেআউট মান নির্ধারণ
-    const rawVal = data.reward || data.amount || data.payout || data.coins || (req.query && (req.query.reward || req.query.payout));
-    let coinsToAdd = parseFloat(rawVal);
+    // ৪. কয়েন বা পেআউট বের করা
+    let rawAmount = data.reward || data.amount || data.payout || data.coins || (req.query && (req.query.reward || req.query.payout || req.query.amount));
+    let coinsToAdd = parseFloat(rawAmount);
 
-    // ছোট ডলার ভ্যালু আসলে কয়েনে কনভার্ট করা
+    // যদি ডলার হিসেবে আসে (যেমন 0.002 বা 1-এর কম) তবে কয়েনে রূপান্তর
     if (!isNaN(coinsToAdd) && coinsToAdd > 0 && coinsToAdd < 1 && !data.reward) {
         coinsToAdd = Math.round(coinsToAdd * 20000);
     } else if (!isNaN(coinsToAdd)) {
         coinsToAdd = Math.round(coinsToAdd);
     }
 
+    // যদি ডেটা পুরোপুরি খালি থাকে
     if (!subId || isNaN(coinsToAdd) || coinsToAdd <= 0) {
         return res.status(200).send("1");
     }
@@ -47,16 +62,16 @@ export default async function handler(req, res) {
     const FIREBASE_DB_URL = "https://stz-exchange-default-rtdb.firebaseio.com";
 
     try {
-        // ১. বর্তমান কয়েন রিড করা
+        // ফায়ারবেস থেকে আগের ব্যালেন্স রিড করা
         const getUrl = `${FIREBASE_DB_URL}/users/${encodeURIComponent(subId)}/coins.json?auth=${FIREBASE_SECRET}`;
         const getRes = await fetch(getUrl);
         const currentData = await getRes.json();
-        const currentCoins = (typeof currentData === 'number') ? currentData : 0;
+        const currentCoins = typeof currentData === 'number' ? currentData : 0;
 
-        // ২. নতুন কয়েন হিসাব
+        // নতুন ব্যালেন্স
         const newBalance = currentCoins + coinsToAdd;
 
-        // ৩. ফায়ারবেসে সেভ করা
+        // ফায়ারবেসে সেভ করা
         const putUrl = `${FIREBASE_DB_URL}/users/${encodeURIComponent(subId)}/coins.json?auth=${FIREBASE_SECRET}`;
         await fetch(putUrl, {
             method: 'PUT',
