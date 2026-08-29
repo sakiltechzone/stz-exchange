@@ -201,25 +201,30 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // 🌟 AUTH CHECK & LOAD OFFERWALL 🌟
+                // 🌟 AUTH CHECK & LOAD OFFERWALL 🌟
         auth.onAuthStateChanged(user => {
             if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
+                // Balance listener
                 db.ref('users/' + user.uid + '/coins').on('value', s => {
                     document.getElementById('bal').innerText = s.val() || 0;
                 });
 
-                loadOfferwall(user.uid);
+                // User UID দিয়ে লোড করা
+                if (user.uid) {
+                    loadOfferwall(user.uid);
+                }
             } else { 
                 window.location.href = "index.html"; 
             }
         });
 
-        // সংশোধিত কোড:
- function loadOfferwall(uid) {
-    const apiKey = "us9yiztefqoxgocfy5e5lsx5vpfjt6";
-    const iframe = document.getElementById('offerwall-frame');
-    iframe.src = `https://offerwallmedia.com/offerwall/${apiKey}/?sub_id=${uid}`;
-}
+        function loadOfferwall(uid) {
+            const apiKey = "us9yiztefqoxgocfy5e5lsx5vpfjt6";
+            const iframe = document.getElementById('offerwall-frame');
+            
+            // স্ল্যাশ ছাড়া সরাসরি প্যারামিটার পাঠানো
+            iframe.src = "https://offerwallmedia.com/offerwall/" + apiKey + "?sub_id=" + encodeURIComponent(uid);
+        }
 
         function onFrameLoaded() {
             document.getElementById('frame-loader').style.display = 'none';
