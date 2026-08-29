@@ -1,17 +1,9 @@
 export default async function handler(req, res) {
-    // POST বা GET রিকোয়েস্ট থেকে ডাটা গ্রহণ
-    const data = req.method === 'POST' ? req.body : req.query;
+    // GET ও POST উভয় রিকোয়েস্ট থেকে ডাটা গ্রহণ
+    const data = { ...req.query, ...req.body };
 
     const subId = data.subId || data.sub_id || data.user_id || data.userId;
     const reward = data.reward || data.amount || data.payout;
-    const secret = data.secret || req.query.secret;
-
-    const MY_SECRET_KEY = "54a7062b19079f327ba02ddc79fefdf3";
-
-    // Secret Key চেক (যদি OfferwallMedia পাঠায়)
-    if (secret && secret !== MY_SECRET_KEY) {
-        return res.status(403).send("0");
-    }
 
     if (!subId || !reward) {
         return res.status(400).send("0");
@@ -22,26 +14,30 @@ export default async function handler(req, res) {
         return res.status(400).send("0");
     }
 
+    // 🌟 ফায়ারবেস Database Secret কি ও REST URL 🌟
+    const FIREBASE_SECRET = "NkYTX3Z0euDlcir7QCSLMHvE0THv6H6IseICcP5U";
+    const FIREBASE_DB_URL = "https://stz-exchange-default-rtdb.firebaseio.com";
+
     try {
-        // সঠিক Firebase Realtime Database REST API URL
-        const FIREBASE_DB_URL = "https://stz-exchange.firebaseio.com";
+        // ১. অ্যাডমিন পারমিশন সহ বর্তমান ব্যালেন্স রিড করা
+        const getRes = await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json?auth=${FIREBASE_SECRET}`);
+        const currentCoins = (await getRes.json()) || 0;
 
-        // ১. ইউজারের বর্তমান কয়েন ফেচ করা
-        const getUserRes = await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json`);
-        const currentCoins = (await getUserRes.json()) || 0;
-
-        // ২. কয়েন যোগ করে নতুন ব্যালেন্স তৈরি
+        // ২. নতুন ব্যালেন্স হিসাব করা
         const updatedCoins = Math.round(currentCoins + coinsToAdd);
 
-        // ৩. ফায়ারবেসে কয়েন সেভ করা
-        await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json`, {
+        // ৩. অ্যাডমিন পারমিশন সহ নতুন ব্যালেন্স সেভ করা
+        const putRes = await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json?auth=${FIREBASE_SECRET}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(updatedCoins)
         });
 
-        // ৪. OfferwallMedia-কে সফল রেসপন্স পাঠানো
-        return res.status(200).send("1");
+        if (putRes.ok) {
+            return res.status(200).send("1");
+        } else {
+            return res.status(500).send("0");
+        }
     } catch (error) {
         return res.status(500).send("0");
     }
