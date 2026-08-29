@@ -1,4 +1,3 @@
-// কাঁচা বডি রিড করার হেল্পার
 async function getRawBody(readable) {
     const chunks = [];
     for await (const chunk of readable) {
@@ -9,14 +8,13 @@ async function getRawBody(readable) {
 
 export default async function handler(req, res) {
     let data = {};
+    let debugLog = {};
 
-    // ১. GET কোয়েরি থাকলে নেওয়া
-    if (req.query && typeof req.query === 'object') {
-        data = { ...data, ...req.query };
-    }
-
-    // ২. POST বডি পার্সিং (Vercel-এর কাঁচা রিকোয়েস্ট থেকে সরাসরি পড়া)
     try {
+        if (req.query && typeof req.query === 'object') {
+            data = { ...data, ...req.query };
+        }
+
         let rawBody = "";
         if (typeof req.body === 'object' && req.body !== null) {
             data = { ...data, ...req.body };
@@ -37,50 +35,57 @@ export default async function handler(req, res) {
                 }
             }
         }
-    } catch (e) {}
 
-    // ৩. SubID বের করা
-    const subId = data.subId || data.sub_id || data.user_id || data.userId || data.uid || data.subid || (req.query && req.query.subId);
+        debugLog.received_data = data;
 
-    // ৪. কয়েন বা পেআউট বের করা
-    let rawAmount = data.reward || data.amount || data.payout || data.coins || (req.query && (req.query.reward || req.query.payout || req.query.amount));
-    let coinsToAdd = parseFloat(rawAmount);
+        const subId = data.subId || data.sub_id || data.user_id || data.userId || data.uid || data.subid || (req.query && req.query.subId);
+        debugLog.extracted_subId = subId;
 
-    // যদি ডলার হিসেবে আসে (যেমন 0.002 বা 1-এর কম) তবে কয়েনে রূপান্তর
-    if (!isNaN(coinsToAdd) && coinsToAdd > 0 && coinsToAdd < 1 && !data.reward) {
-        coinsToAdd = Math.round(coinsToAdd * 20000);
-    } else if (!isNaN(coinsToAdd)) {
-        coinsToAdd = Math.round(coinsToAdd);
-    }
+        let rawAmount = data.reward || data.amount || data.payout || data.coins || (req.query && (req.query.reward || req.query.payout || req.query.amount));
+        let coinsToAdd = parseFloat(rawAmount);
 
-    // যদি ডেটা পুরোপুরি খালি থাকে
-    if (!subId || isNaN(coinsToAdd) || coinsToAdd <= 0) {
-        return res.status(200).send("1");
-    }
+        if (!isNaN(coinsToAdd) && coinsToAdd > 0 && coinsToAdd < 1 && !data.reward) {
+            coinsToAdd = Math.round(coinsToAdd * 20000);
+        } else if (!isNaN(coinsToAdd)) {
+            coinsToAdd = Math.round(coinsToAdd);
+        }
+        debugLog.parsed_coins = coinsToAdd;
 
-    const FIREBASE_SECRET = "NkYTX3Z0euDlcir7QCSLMHvE0THv6H6IseICcP5U";
-    const FIREBASE_DB_URL = "https://stz-exchange-default-rtdb.firebaseio.com";
+        if (!subId || isNaN(coinsToAdd) || coinsToAdd <= 0) {
+            return res.status(200).json({ status: "fail", message: "Invalid SubID or Coins", debug: debugLog });
+        }
 
-    try {
-        // ফায়ারবেস থেকে আগের ব্যালেন্স রিড করা
+        const FIREBASE_SECRET = "NkYTX3Z0euDlcir7QCSLMHvE0THv6H6IseICcP5U";
+        const FIREBASE_DB_URL = "https://stz-exchange-default-rtdb.firebaseio.com";
+
+        // ১. ফায়ারবেস থেকে ডেটা রিড করার চেষ্টা
         const getUrl = `${FIREBASE_DB_URL}/users/${encodeURIComponent(subId)}/coins.json?auth=${FIREBASE_SECRET}`;
         const getRes = await fetch(getUrl);
-        const currentData = await getRes.json();
-        const currentCoins = typeof currentData === 'number' ? currentData : 0;
+        const getResText = await getRes.text();
+        debugLog.firebase_get_response = getResText;
 
-        // নতুন ব্যালেন্স
+        let currentCoins = 0;
+        try {
+            const parsedGet = JSON.parse(getResText);
+            if (typeof parsedGet === 'number') currentCoins = parsedGet;
+        } catch(e) {}
+
         const newBalance = currentCoins + coinsToAdd;
+        debugLog.calculated_new_balance = newBalance;
 
-        // ফায়ারবেসে সেভ করা
+        // ২. ফায়ারবেসে ডেটা রাইট করার চেষ্টা
         const putUrl = `${FIREBASE_DB_URL}/users/${encodeURIComponent(subId)}/coins.json?auth=${FIREBASE_SECRET}`;
-        await fetch(putUrl, {
+        const putRes = await fetch(putUrl, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(newBalance)
         });
+        const putResText = await putRes.text();
+        debugLog.firebase_put_response = putResText;
 
-        return res.status(200).send("1");
+        return res.status(200).json({ status: "success", debug: debugLog });
+
     } catch (err) {
-        return res.status(200).send("1");
+        return res.status(200).json({ status: "error", error_message: err.message, debug: debugLog });
     }
 }
