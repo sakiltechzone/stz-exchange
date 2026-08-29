@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Surf Ads | STZ Exchange</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
     <style>
         /* --- Premium Light Theme Variables --- */
         :root {
@@ -23,44 +20,69 @@
             --shadow-sm: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
         }
 
-        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100dvh; overflow: hidden; position: relative; }
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; position: relative; }
 
-        /* --- Main Content Area (Full Width, No Sidebar) --- */
-        .main-content { flex: 1; display: flex; flex-direction: column; width: 100%; position: relative; }
+        /* --- FLAT SIDEBAR --- */
+        .sidebar { width: 260px; background: var(--bg-white); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; height: 100vh; position: fixed; transition: 0.3s; z-index: 1000; box-shadow: 2px 0 15px rgba(0,0,0,0.05); }
+        .sidebar-brand { height: 70px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: var(--text-dark); letter-spacing: 1px; border-bottom: 1px solid var(--border-color); }
+        .sidebar-brand i { color: var(--primary-blue); font-size: 24px; margin-right: 10px; }
+        
+        .nav-menu { padding: 15px; display: flex; flex-direction: column; gap: 5px; flex: 1; overflow-y: auto;}
+        
+        .switch-panel { background: var(--primary-blue); color: #fff; padding: 15px; border-radius: 8px; text-align: left; cursor: pointer; transition: 0.3s; margin-bottom: 10px; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); position: relative; }
+        .switch-panel:hover { background: var(--primary-hover); }
+        .switch-title { font-weight: 600; font-size: 15px; }
+        .switch-sub { font-size: 11px; opacity: 0.8; margin-top: 3px; }
+        .switch-panel i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); }
 
-        /* Top Header - ONLY BRAND AND COINS */
-        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; z-index: 10; }
+        .menu-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin: 15px 0 5px 10px; letter-spacing: 1px; }
+
+        .nav-item { padding: 12px 15px; color: var(--text-main); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 500; transition: all 0.2s; position: relative;}
+        .nav-item i.main-icon { font-size: 16px; width: 20px; text-align: center; color: var(--text-light); transition: 0.2s; }
         
-        .mobile-brand { display: flex; font-size: 20px; font-weight: 700; color: var(--text-dark); align-items: center; gap: 8px; }
+        .nav-item:hover { background: var(--bg-body); color: var(--text-dark); }
+        .nav-item:hover i.main-icon { color: var(--text-dark); }
         
-        .user-info { display: flex; align-items: center; justify-content: flex-end; }
-        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 18px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 16px; border: 1px solid rgba(246, 194, 62, 0.5); }
+        .nav-item.active { background: var(--primary-blue); color: #fff; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.2); }
+        .nav-item.active i.main-icon { color: #fff; }
+
+        /* --- Main Content Area --- */
+        .main-content { margin-left: 260px; flex: 1; display: flex; flex-direction: column; width: calc(100% - 260px); }
+
+        /* Top Header */
+        .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 10; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .menu-toggle { display: none; font-size: 20px; color: var(--text-main); cursor: pointer; padding: 8px; border-radius: 5px; }
+        .back-btn { font-size: 20px; color: var(--text-main); cursor: pointer; padding: 8px; display: none; }
+        .menu-toggle:hover, .back-btn:hover { background: var(--bg-body); }
+        
+        .user-info { display: flex; align-items: center; gap: 20px; }
+        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 15px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 14px; border: 1px solid rgba(246, 194, 62, 0.5); }
 
         /* --- Surf Body --- */
-        /* Fixed Padding so scroll content doesn't get cut off at the bottom nav */
-        .dashboard-body { padding: 25px 20px 90px 20px; overflow-y: auto; flex: 1; } 
+        .dashboard-body { padding: 30px; overflow-y: auto; flex: 1; }
         
         /* Ad Title Area */
         .page-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap: 10px;}
-        .page-title { font-size: 20px; font-weight: 700; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px;}
-        .ad-counter-badge { background: var(--primary-blue); color: #fff; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); }
+        .page-title { font-size: 24px; font-weight: 600; color: var(--text-dark); margin: 0; display: flex; align-items: center; gap: 10px;}
+        .ad-counter-badge { background: var(--primary-blue); color: #fff; padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); }
 
-        .surf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .surf-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
         
         /* Pro Ad Card Design */
-        .surf-card { background: var(--bg-white); border: 1px solid var(--border-color); padding: 20px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 15px; transition: 0.3s; position: relative; overflow: hidden; box-shadow: var(--shadow-sm);}
-        .surf-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary-blue); opacity: 0; transition: 0.3s; }
+        .surf-card { background: var(--bg-white); border: 1px solid var(--border-color); padding: 25px; border-radius: 12px; display: flex; align-items: center; gap: 20px; transition: 0.3s; position: relative; overflow: hidden; box-shadow: var(--shadow-sm);}
+        .surf-card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary-blue); opacity: 0; transition: 0.3s; }
         .surf-card:hover { transform: translateY(-3px); box-shadow: 0 0.5rem 1.5rem rgba(0,0,0,0.1); border-color: rgba(78, 115, 223, 0.3); }
         .surf-card:hover::before { opacity: 1; }
 
-        .surf-card-icon { font-size: 30px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 15px; flex-shrink: 0; margin: 0 auto;}
-        .surf-card-details { flex: 1; width: 100%;}
-        .surf-card-details h4 { margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: var(--text-dark); line-height: 1.3;}
-        .time-badge { font-size: 11px; font-weight: 600; background: var(--bg-body); padding: 5px 10px; border-radius: 6px; color: var(--text-main); display: inline-block; margin-bottom: 8px; border: 1px solid var(--border-color); text-transform: uppercase;}
-        .text-gold { color: #f6c23e; font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; gap: 5px; margin-top: 5px;}
+        .surf-card-icon { font-size: 28px; width: 60px; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 12px; flex-shrink: 0; }
+        .surf-card-details { flex: 1; }
+        .surf-card-details h4 { margin: 0 0 5px 0; font-size: 15px; font-weight: 700; color: var(--text-dark); line-height: 1.3;}
+        .time-badge { font-size: 11px; font-weight: 600; background: var(--bg-body); padding: 4px 8px; border-radius: 5px; color: var(--text-main); display: inline-block; margin-bottom: 5px; border: 1px solid var(--border-color); text-transform: uppercase;}
+        .text-gold { color: #f6c23e; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 5px; margin-top: 5px;}
         
-        .visit-btn { width: 100%; background: var(--primary-blue); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 14px; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;}
-        .visit-btn:hover { background: var(--primary-hover); box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); transform: scale(1.02); }
+        .visit-btn { background: var(--primary-blue); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 13px; display: flex; align-items: center; gap: 8px; font-family: 'Poppins', sans-serif;}
+        .visit-btn:hover { background: var(--primary-hover); box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); transform: scale(1.05); }
 
         /* Empty State */
         .empty-state { text-align: center; padding: 50px 20px; color: var(--text-main); grid-column: 1 / -1; }
@@ -68,15 +90,15 @@
 
         /* --- PRO SURFING VIEW (Modal) for Timer Ads --- */
         #surfing-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 9999; flex-direction: column; }
-        .pro-timer-header { position: relative; height: 70px; background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; padding: 0 15px; border-bottom: 1px solid rgba(255,255,255,0.05); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
+        .pro-timer-header { position: relative; height: 70px; background: rgba(15, 15, 20, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; padding: 0 20px; border-bottom: 1px solid rgba(255,255,255,0.05); box-shadow: 0 5px 20px rgba(0,0,0,0.5); }
         .surf-brand { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 16px; color: #aaa; }
-        .surf-brand span { display: none; } /* Hidden on mobile */
         .surf-brand i { color: #00ddff; font-size: 20px; }
         .timer-center { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .glowing-time { font-size: 24px; font-weight: bold; color: #00ddff; text-shadow: 0 0 15px rgba(0, 221, 255, 0.6); line-height: 1; margin-bottom: 3px; }
-        .status-text { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: bold; transition: 0.3s; }
+        .glowing-time { font-size: 28px; font-weight: bold; color: #00ddff; text-shadow: 0 0 15px rgba(0, 221, 255, 0.6); line-height: 1; margin-bottom: 3px; }
+        .status-text { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: #888; font-weight: bold; transition: 0.3s; }
+        .action-right { min-width: 100px; display: flex; justify-content: flex-end; }
         
-        .claim-btn { display: none; background: linear-gradient(135deg, #1cc88a, #13855c); color: #fff; border: none; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; box-shadow: 0 0 15px rgba(28, 200, 138, 0.4); animation: popIn 0.4s ease-out forwards; }
+        .claim-btn { display: none; background: linear-gradient(135deg, #1cc88a, #13855c); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; font-size: 14px; cursor: pointer; box-shadow: 0 0 15px rgba(28, 200, 138, 0.4); animation: popIn 0.4s ease-out forwards; }
         @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         
         .progress-container { position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(255,255,255,0.05); }
@@ -90,27 +112,42 @@
         .new-tab-box h3 { color: var(--text-dark); margin: 0 0 10px 0; font-size: 20px; }
         .new-tab-box p { color: var(--text-main); font-size: 14px; margin-bottom: 25px; line-height: 1.5; }
         .retry-btn { padding: 12px 25px; background: var(--warning); color: #fff; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; margin: 0 auto; font-family: 'Poppins', sans-serif; transition: 0.3s;}
+        .retry-btn:hover { background: #d9a323; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(246, 194, 62, 0.4);}
 
-        /* 🌟 BOTTOM NAVIGATION 🌟 */
-        .bottom-nav { display: flex; position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; background: var(--bg-white); border-top: 1px solid var(--border-color); z-index: 1000; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); padding-bottom: env(safe-area-inset-bottom); }
-        .b-nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-light); text-decoration: none; font-size: 12px; font-weight: 600; gap: 5px; width: 25%; transition: 0.3s; cursor: pointer; }
-        .b-nav-item i { font-size: 20px; }
-        .b-nav-item:hover { color: var(--primary-hover); }
-        .b-nav-item.active { color: var(--primary-blue); }
-        .b-nav-item.active i { transform: translateY(-2px); }
+        /* Mobile Overlay */
+        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
 
+        @media (max-width: 768px) {
+            .sidebar { left: -260px; }
+            .sidebar.active { left: 0; }
+            .main-content { margin-left: 0; width: 100%; }
+            .menu-toggle, .back-btn { display: block; } 
+            .overlay.active { display: block; }
+            
+            .surf-grid { grid-template-columns: 1fr; gap: 15px; }
+            .surf-card { flex-direction: column; text-align: center; padding: 20px; }
+            .visit-btn { width: 100%; margin-top: 10px; padding: 14px; justify-content: center;}
+            
+            .pro-timer-header { padding: 0 10px; }
+            .surf-brand span { display: none; } 
+            .action-right { min-width: auto; }
+            .claim-btn { padding: 8px 12px; font-size: 12px; }
+            .glowing-time { font-size: 24px; }
+        }
     </style>
 </head>
 <body>
 
     <div id="surfing-view">
         <div class="pro-timer-header">
-            <div class="surf-brand"><i class="fas fa-play"></i></div>
+            <div class="surf-brand"><i class="fas fa-play"></i> <span>STZ Exchange</span></div>
             <div class="timer-center">
                 <div class="glowing-time" id="timer-text">00</div>
                 <div class="status-text" id="reward-status">Viewing Content...</div>
             </div>
-            <button class="claim-btn" id="close-btn" onclick="closeSurfer()"><i class="fas fa-check-circle"></i> Claim</button>
+            <div class="action-right">
+                <button class="claim-btn" id="close-btn" onclick="closeSurfer()"><i class="fas fa-check-circle"></i> Claim</button>
+            </div>
             <div class="progress-container"><div class="progress-fill" id="progress-line"></div></div>
         </div>
         
@@ -126,11 +163,46 @@
         </div>
     </div>
 
+    <div class="overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-brand"><i class="fas fa-play"></i> STZ Exchange</div>
+        <div class="nav-menu">
+            <div class="switch-panel" onclick="alert('Advertiser panel clicked!')">
+                <div class="switch-title">Advertiser Panel</div>
+                <div class="switch-sub">Click Here To Switch</div>
+                <i class="fas fa-chevron-right"></i>
+            </div>
+            
+            <div class="nav-item" onclick="window.location.href='dashboard.html'"><i class="fas fa-home main-icon"></i> <span>Dashboard</span></div>
+            
+            <div class="menu-label">EARNING</div>
+            <div class="nav-item active" onclick="window.location.href='surf.html'"><i class="fas fa-mouse-pointer main-icon"></i> <span>Surf & Earn</span></div>
+            <div class="nav-item" onclick="window.location.href='offerwall.html'"><i class="fas fa-tasks main-icon"></i> <span>Offerwalls</span></div>
+            <div class="nav-item" onclick="window.location.href='refer.html'"><i class="fas fa-users-cog main-icon"></i> <span>Refer & Earn</span></div>
+
+            <div class="menu-label">CAMPAIGNS</div>
+            <div class="nav-item" onclick="window.location.href='campaign.html'"><i class="fas fa-plus-circle main-icon"></i> <span>Add Campaign</span></div>
+            <div class="nav-item" onclick="window.location.href='my_campaigns.html'"><i class="fas fa-list-alt main-icon"></i> <span>My Campaigns</span></div>
+            
+            <div class="menu-label">ACCOUNT</div>
+            <div class="nav-item" onclick="window.location.href='profile.html'"><i class="fas fa-user main-icon"></i> <span>My Profile</span></div>
+            
+            <div class="menu-label">HELP</div>
+            <div class="nav-item" onclick="window.location.href='support.html'"><i class="fas fa-headset main-icon"></i> <span>Contact Support</span></div>
+            
+            <div class="nav-item" onclick="logoutUser()" style="color: #e74a3b;"><i class="fas fa-sign-out-alt main-icon" style="color: #e74a3b;"></i> <span>Logout</span></div>
+        </div>
+    </div>
+
     <div class="main-content">
         <div class="top-header">
-            <div class="mobile-brand"><i class="fas fa-play" style="color:var(--primary-blue);"></i> STZ</div>
+            <div class="header-left">
+                <div class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+                <div class="back-btn" onclick="goBack()" title="Go Back"><i class="fas fa-arrow-left"></i></div>
+            </div>
             <div class="user-info">
-                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">...</span></div>
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">...</span> Coins</div>
             </div>
         </div>
 
@@ -138,7 +210,7 @@
             
             <div class="page-header-flex">
                 <h2 class="page-title"><i class="fas fa-mouse-pointer" style="color: var(--primary-blue);"></i> Available Ads</h2>
-                <div class="ad-counter-badge">Available: <span id="ad-count">0</span></div>
+                <div class="ad-counter-badge">Total Ads: <span id="ad-count">0</span></div>
             </div>
             
             <div class="surf-grid" id="ads-container">
@@ -150,34 +222,16 @@
         </div>
     </div>
 
-    <div class="bottom-nav">
-        <a href="dashboard.html" class="b-nav-item">
-            <i class="fas fa-home"></i> <span>Home</span>
-        </a>
-        <a href="surf.html" class="b-nav-item active">
-            <i class="fas fa-mouse-pointer"></i> <span>Surf</span>
-        </a>
-        <a href="campaign.html" class="b-nav-item">
-            <i class="fas fa-plus-circle"></i> <span>Add Ad</span>
-        </a>
-        <a href="profile.html" class="b-nav-item">
-            <i class="fas fa-user"></i> <span>Profile</span>
-        </a>
-    </div>
-
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
     <script>
-        // 🌟 Initialize Telegram Web App
-        try {
-            const tg = window.Telegram.WebApp;
-            tg.expand(); 
-            tg.ready();
-        } catch(e) {
-            console.log("Not running inside Telegram");
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('mobile-overlay').classList.toggle('active');
         }
+        function goBack() { window.history.back(); }
 
         const firebaseConfig = {
             apiKey: "AIzaSyBFevvLD7eqHwSuq4aDavzEQy6qjQCMlUA",
@@ -187,9 +241,7 @@
             messagingSenderId: "855972947902",
             appId: "1:855972947902:web:9fc9609346b30d9fdbfbef"
         };
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
+        firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
@@ -211,6 +263,13 @@
                 window.location.href="index.html"; 
             }
         });
+
+        function logoutUser() {
+            localStorage.removeItem('stz_user_login'); 
+            auth.signOut().then(() => { 
+                window.location.href = "index.html"; 
+            });
+        }
 
         // --- LOAD DYNAMIC CAMPAIGNS ---
         function loadCampaigns() {
@@ -254,7 +313,7 @@
 
                         let timerValue = isNaN(camp.duration) ? 60 : camp.duration;
                         let displayDuration = isInstant ? "Instant Check" : `${timerValue} Secs`;
-                        let timeIcon = isInstant ? '<i class="fas fa-bolt" style="color:#f6c23e;"></i>' : '<i class="far fa-clock"></i>';
+                        let timeIcon = isInstant ? '<i class="fas fa-bolt" style="color:var(--warning);"></i>' : '<i class="far fa-clock"></i>';
 
                         const adHtml = `
                             <div class="surf-card" id="card-${campId}">
@@ -267,7 +326,7 @@
                                     <div class="text-gold"><i class="fas fa-coins"></i> +${rewardCoins} Coins</div>
                                 </div>
                                 <button class="visit-btn" onclick="openSurfer('${campId}', '${camp.url}', ${rewardCoins}, ${timerValue}, '${camp.category || 'Website Visit'}')">
-                                    <span>Start Earning</span> <i class="fas fa-arrow-right"></i>
+                                    <span>Start</span> <i class="fas fa-arrow-right"></i>
                                 </button>
                             </div>
                         `;
@@ -300,11 +359,13 @@
             currentReward = reward;
             currentAdUrl = url;
 
-            // 🌟 1. NO TIMER CATEGORIES (Instant Reward & Direct Link)
+            // 🌟 1. NO TIMER CATEGORIES (Instant Reward & Direct Link) 🌟
             if (category === 'YouTube' || category === 'Facebook' || category === 'App Download' || category === 'Sign Up') {
                 
+                // Open the link in a new tab immediately
                 window.open(url, '_blank'); 
                 
+                // Process the reward silently in the database
                 db.ref('users/' + currentUser.uid).transaction(data => {
                     if(data) {
                         data.coins = (data.coins || 0) + currentReward;
@@ -323,16 +384,12 @@
                         }
                         return camp;
                     });
-                    
-                    if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.showAlert) {
-                        window.Telegram.WebApp.showAlert(`✅ Instant Reward: +${currentReward} Coins added!`);
-                    }
                 });
                 
-                return; 
+                return; // Stop here! Do not execute the timer code below.
             }
 
-            // 🌟 2. TIMER CATEGORIES (Website Visit & Video Ad Only)
+            // 🌟 2. TIMER CATEGORIES (Website Visit & Video Ad Only) 🌟
             const view = document.getElementById('surfing-view');
             const frame = document.getElementById('ad-frame');
             const newTabMsg = document.getElementById('new-tab-message');
@@ -342,8 +399,8 @@
             const progressLine = document.getElementById('progress-line');
 
             let isEmbeddable = true;
-            if(url.includes("facebook.com") || url.includes("fb.watch") || url.includes("play.google.com") || url.includes("instagram.com") || url.includes("t.me")) {
-                isEmbeddable = false; 
+            if(url.includes("facebook.com") || url.includes("fb.watch") || url.includes("play.google.com") || url.includes("instagram.com")) {
+                isEmbeddable = false; // Fallback security if wrong URL given in Website category
             }
 
             view.style.display = 'flex';
@@ -406,7 +463,7 @@
                     }
                     return camp;
                 }).then(() => {
-                    status.innerText = `SUCCESS! +${currentReward} COINS`;
+                    status.innerText = "SUCCESS! +" + currentReward + " COINS";
                     status.style.color = "#1cc88a";
                     timerText.innerHTML = '<i class="fas fa-check"></i>';
                     timerText.style.color = "#1cc88a";
