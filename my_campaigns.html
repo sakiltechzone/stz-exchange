@@ -37,7 +37,7 @@
 
         .menu-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; margin: 15px 0 5px 10px; letter-spacing: 1px; }
 
-        /* 🌟 FIXED MENU HOVER EFFECT 🌟 */
+        /* --- Menu Items --- */
         .nav-item { padding: 12px 15px; color: var(--text-main); cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 500; transition: all 0.2s;}
         .nav-item i.main-icon { font-size: 16px; width: 20px; text-align: center; color: var(--text-light); transition: 0.2s; }
         
@@ -55,11 +55,9 @@
         .header-left { display: flex; align-items: center; gap: 15px; }
         .menu-toggle { display: none; font-size: 20px; color: var(--text-main); cursor: pointer; padding: 8px; border-radius: 5px; }
         
-        .user-info { display: flex; align-items: center; gap: 20px; }
-        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 15px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 14px; border: 1px solid rgba(246, 194, 62, 0.5); }
-        .profile-icon { display: flex; align-items: center; gap: 10px; cursor: pointer; }
-        .profile-icon img { width: 35px; height: 35px; border-radius: 50%; border: 2px solid var(--border-color); }
-        .profile-name { font-size: 14px; font-weight: 600; color: var(--text-main); }
+        .header-balance-wrap { display: flex; align-items: center; gap: 10px; }
+        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #b78a02; padding: 8px 15px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 14px; border: 1px solid rgba(246, 194, 62, 0.5); }
+        .usd-pill { background: rgba(28, 200, 138, 0.1); color: #1cc88a; padding: 8px 15px; border-radius: 20px; font-weight: 700; font-size: 14px; border: 1px solid rgba(28, 200, 138, 0.4); display: flex; align-items: center; gap: 5px; }
 
         /* --- Dashboard Body --- */
         .dashboard-body { padding: 30px; overflow-y: auto; flex: 1; }
@@ -74,29 +72,23 @@
         
         .camp-info { flex: 1; min-width: 250px; }
         .camp-title { font-size: 16px; font-weight: 700; color: var(--text-dark); margin: 0 0 5px 0; display: flex; align-items: center; gap: 10px; }
-        .camp-meta { font-size: 13px; color: var(--text-main); display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        .camp-meta { font-size: 13px; color: var(--text-main); display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin-top: 5px; }
         .camp-meta span { display: flex; align-items: center; gap: 5px; }
         
         /* Badges */
-        .badge { padding: 4px 10px; border-radius: 5px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .badge-pending { background: rgba(246, 194, 62, 0.1); color: #f6c23e; border: 1px solid rgba(246, 194, 62, 0.3); }
-        .badge-active { background: rgba(28, 200, 138, 0.1); color: #1cc88a; border: 1px solid rgba(28, 200, 138, 0.3); }
-        .badge-completed { background: rgba(78, 115, 223, 0.1); color: var(--primary-blue); border: 1px solid rgba(78, 115, 223, 0.3); }
-        .badge-rejected { background: rgba(231, 74, 59, 0.1); color: #e74a3b; border: 1px solid rgba(231, 74, 59, 0.3); }
-
-        /* Progress Bar */
-        .progress-box { flex: 1; min-width: 200px; max-width: 300px; }
-        .progress-meta { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; color: var(--text-main); margin-bottom: 5px; }
-        .progress-bg { width: 100%; height: 8px; background: var(--border-color); border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--primary-blue); border-radius: 10px; transition: width 0.5s ease; }
+        .badge { padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .badge-pending { background: rgba(246, 194, 62, 0.15); color: #b78a02; border: 1px solid rgba(246, 194, 62, 0.4); }
+        .badge-running { background: rgba(28, 200, 138, 0.15); color: #1cc88a; border: 1px solid rgba(28, 200, 138, 0.4); }
+        .badge-completed { background: rgba(78, 115, 223, 0.15); color: var(--primary-blue); border: 1px solid rgba(78, 115, 223, 0.4); }
+        .badge-rejected { background: rgba(231, 74, 59, 0.15); color: #e74a3b; border: 1px solid rgba(231, 74, 59, 0.4); }
 
         /* Actions */
-        .camp-actions { display: flex; gap: 10px; }
-        .btn-action { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 35px; height: 35px; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
-        .btn-action:hover { background: var(--border-color); }
+        .camp-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-action { background: var(--bg-body); border: 1px solid var(--border-color); color: var(--text-main); width: 38px; height: 38px; border-radius: 8px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; font-size: 14px; }
+        .btn-action:hover { background: var(--primary-blue); color: white; border-color: var(--primary-blue); }
         .btn-delete:hover { background: #e74a3b; color: white; border-color: #e74a3b; }
 
-        .reject-reason { font-size: 12px; color: #e74a3b; margin-top: 5px; display: block; font-weight: 500; }
+        .reject-reason { font-size: 12px; color: #e74a3b; margin-top: 8px; display: block; font-weight: 500; }
 
         .empty-state { text-align: center; padding: 50px 20px; color: var(--text-main); }
         .empty-state i { font-size: 50px; color: var(--border-color); margin-bottom: 15px; }
@@ -110,10 +102,9 @@
             .main-content { margin-left: 0; width: 100%; }
             .menu-toggle { display: block; }
             .overlay.active { display: block; }
-            .profile-name { display: none; }
             .dashboard-body { padding: 20px; }
             .camp-card { flex-direction: column; align-items: flex-start; }
-            .progress-box { max-width: 100%; width: 100%; }
+            .camp-actions { width: 100%; justify-content: flex-end; }
         }
     </style>
 </head>
@@ -121,6 +112,7 @@
 
     <div class="overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
 
+    <!-- SIDEBAR -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-brand"><i class="fas fa-play"></i> STZ Exchange</div>
         <div class="nav-menu">
@@ -134,8 +126,11 @@
             
             <div class="menu-label">EARNING</div>
             <div class="nav-item" onclick="window.location.href='surf.html'"><i class="fas fa-mouse-pointer main-icon"></i> <span>Surf & Earn</span></div>
-            <div class="nav-item" onclick="window.location.href='offerwall.html'"><i class="fas fa-tasks main-icon"></i> <span>Offerwalls</span></div>
+            <div class="nav-item" onclick="window.location.href='offerwall.html'"><i class="fas fa-tasks main-icon"></i> <span>Offer Walls</span></div>
             <div class="nav-item" onclick="window.location.href='refer.html'"><i class="fas fa-users-cog main-icon"></i> <span>Refer & Earn</span></div>
+
+            <div class="menu-label">FINANCE</div>
+            <div class="nav-item" onclick="window.location.href='withdraw.html'"><i class="fas fa-wallet main-icon"></i> <span>Withdraw Funds</span></div>
 
             <div class="menu-label">CAMPAIGNS</div>
             <div class="nav-item" onclick="window.location.href='campaign.html'"><i class="fas fa-plus-circle main-icon"></i> <span>Add Campaign</span></div>
@@ -151,24 +146,22 @@
         </div>
     </div>
 
+    <!-- MAIN CONTENT -->
     <div class="main-content">
         <div class="top-header">
             <div class="header-left">
                 <div class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             </div>
-            <div class="user-info">
-                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="display-coins">...</span> Coins</div>
-                <div class="profile-icon" onclick="window.location.href='profile.html'">
-                    <span class="profile-name" id="display-name">Loading...</span>
-                    <img src="https://ui-avatars.com/api/?name=User&background=4e73df&color=fff" id="avatar-img" alt="Profile">
-                </div>
+            <div class="header-balance-wrap">
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="display-coins">0</span> Coins</div>
+                <div class="usd-pill"><i class="fas fa-dollar-sign"></i> <span id="display-usd">0.00</span></div>
             </div>
         </div>
 
         <div class="dashboard-body">
             
             <h2 class="page-title"><i class="fas fa-list-alt" style="color: var(--primary-blue); margin-right: 8px;"></i> My Campaigns</h2>
-            <p class="page-subtitle">Track the performance and status of your submitted campaigns.</p>
+            <p class="page-subtitle">Track the approval status and manage your submitted campaigns.</p>
 
             <div class="campaign-list" id="campaign-list">
                 <div class="empty-state">
@@ -184,7 +177,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-        <script>
+    <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('mobile-overlay').classList.toggle('active');
@@ -208,15 +201,11 @@
             if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
                 currentUser = user;
                 
-                // Fetch User Details for Header
-                db.ref('users/' + user.uid).on('value', (snapshot) => {
-                    const data = snapshot.val();
-                    if(data) {
-                        const userName = data.fullName || 'User';
-                        document.getElementById('display-name').innerText = userName;
-                        document.getElementById('avatar-img').src = `https://ui-avatars.com/api/?name=${userName}&background=4e73df&color=fff`;
-                        document.getElementById('display-coins').innerText = data.coins || 0;
-                    }
+                // Realtime Coins & USD Listener
+                db.ref('users/' + user.uid + '/coins').on('value', (snapshot) => {
+                    const userCoins = snapshot.val() || 0;
+                    document.getElementById('display-coins').innerText = userCoins.toLocaleString();
+                    document.getElementById('display-usd').innerText = (userCoins / 1000).toFixed(2);
                 });
 
                 // Load User's Campaigns
@@ -246,21 +235,23 @@
 
                 let campaignsArr = [];
                 snapshot.forEach(child => { campaignsArr.push({ id: child.key, ...child.val() }); });
-                campaignsArr.reverse(); // Show newest first
+                campaignsArr.reverse();
 
                 campaignsArr.forEach(camp => {
                     let badgeClass = 'badge-pending';
                     let statusText = 'Pending';
-                    let progressWidth = 0;
-                    let viewsDone = camp.viewsCompleted || 0;
 
-                    if(camp.totalViews > 0) {
-                        progressWidth = (viewsDone / camp.totalViews) * 100;
+                    // 🌟 স্ট্যাটাস লজিক: active/approved হলে Running দেখাবে 🌟
+                    if(camp.status === 'active' || camp.status === 'approved') { 
+                        badgeClass = 'badge-running'; 
+                        statusText = 'Running'; 
+                    } else if(camp.status === 'completed') { 
+                        badgeClass = 'badge-completed'; 
+                        statusText = 'Completed'; 
+                    } else if(camp.status === 'rejected') { 
+                        badgeClass = 'badge-rejected'; 
+                        statusText = 'Rejected'; 
                     }
-
-                    if(camp.status === 'active') { badgeClass = 'badge-active'; statusText = 'Active'; }
-                    else if(camp.status === 'completed') { badgeClass = 'badge-completed'; statusText = 'Completed'; progressWidth = 100; }
-                    else if(camp.status === 'rejected') { badgeClass = 'badge-rejected'; statusText = 'Rejected'; }
 
                     const rejectMsg = camp.status === 'rejected' && camp.rejectReason ? `<span class="reject-reason"><i class="fas fa-exclamation-triangle"></i> Reason: ${camp.rejectReason}</span>` : '';
 
@@ -276,24 +267,13 @@
                                 <h4 class="camp-title">${camp.title} <span class="badge ${badgeClass}">${statusText}</span></h4>
                                 <div class="camp-meta">
                                     <span>${catIcon} ${camp.category || 'Website Visit'}</span>
-                                    <span><i class="far fa-clock"></i> ${camp.duration}s/view</span>
-                                    <span><i class="fas fa-coins" style="color:#f6c23e;"></i> Total Cost: ${camp.totalViews * camp.costPerView}</span>
+                                    <span><i class="far fa-clock"></i> ${camp.duration ? camp.duration + 's' : 'Unlimited'}</span>
                                 </div>
                                 ${rejectMsg}
                             </div>
-                            
-                            <div class="progress-box">
-                                <div class="progress-meta">
-                                    <span>Views/Actions</span>
-                                    <span>${viewsDone} / ${camp.totalViews}</span>
-                                </div>
-                                <div class="progress-bg">
-                                    <div class="progress-fill" style="width: ${progressWidth}%;"></div>
-                                </div>
-                            </div>
 
                             <div class="camp-actions">
-                                <button class="btn-action" title="View Link" onclick="window.open('${camp.url}', '_blank')"><i class="fas fa-external-link-alt"></i></button>
+                                <button class="btn-action" title="Visit Link" onclick="window.open('${camp.url}', '_blank')"><i class="fas fa-external-link-alt"></i></button>
                                 <button class="btn-action btn-delete" title="Delete Campaign" onclick="deleteCampaign('${camp.id}')"><i class="fas fa-trash-alt"></i></button>
                             </div>
                         </div>
@@ -313,7 +293,6 @@
             }
         }
 
-        // 🌟 FIXED USER LOGOUT FUNCTION 🌟
         function logoutUser() {
             localStorage.removeItem('stz_user_login'); 
             auth.signOut().then(() => { 
@@ -321,3 +300,5 @@
             });
         }
     </script>
+</body>
+</html>

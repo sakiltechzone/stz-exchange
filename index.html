@@ -270,14 +270,24 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
+        // 🌟 Auto Detect Referral Code from URL 🌟
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const refCode = urlParams.get('ref');
+            if (refCode) {
+                document.getElementById('signup-referral').value = refCode;
+                toggleForm('signup');
+            }
+        });
+
         // 🌟 LIVE MAINTENANCE MODE CHECKER 🌟
         db.ref('settings/maintenanceMode').on('value', snapshot => {
             if (snapshot.exists() && snapshot.val() === 'on') {
                 document.getElementById('maintenance-screen').style.display = 'flex';
-                document.getElementById('main-auth-container').style.display = 'none'; // Hide login form
+                document.getElementById('main-auth-container').style.display = 'none';
             } else {
                 document.getElementById('maintenance-screen').style.display = 'none';
-                document.getElementById('main-auth-container').style.display = 'block'; // Show login form
+                document.getElementById('main-auth-container').style.display = 'block';
             }
         });
 
@@ -303,7 +313,7 @@
 
             auth.sendPasswordResetEmail(email)
             .then(() => {
-                alert("✅ Please check your inbox");
+                alert("✅ Please check your inbox for password reset instructions.");
             })
             .catch((error) => {
                 alert("Error: " + error.message);
@@ -379,7 +389,6 @@
         function loginUser() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
-            const loginType = document.querySelector('input[name="login_type"]:checked').value; 
             
             const errorBox = document.getElementById('error-message');
             const errorText = document.getElementById('error-text');
@@ -413,7 +422,6 @@
                 btn.innerHTML = 'Sign In';
                 btn.disabled = false;
                 
-                // Professional Error Messages
                 if (error.code === 'auth/invalid-login-credentials' || 
                     error.code === 'auth/wrong-password' || 
                     error.code === 'auth/user-not-found' || 
@@ -428,7 +436,7 @@
             });
         }
 
-        // Custom Auth Check for Users only
+        // Custom Auth Check
         auth.onAuthStateChanged((user) => {
             if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
                 window.location.href = "dashboard.html";

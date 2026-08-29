@@ -25,7 +25,6 @@
 
         body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        /* --- ADMIN SIDEBAR --- */
         .sidebar { width: 260px; background: var(--primary-dark); display: flex; flex-direction: column; height: 100vh; position: fixed; transition: 0.3s; z-index: 1000; color: #fff; box-shadow: 2px 0 15px rgba(0,0,0,0.1);}
         .sidebar-brand { height: 70px; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; letter-spacing: 1px; border-bottom: 1px solid rgba(255,255,255,0.05); }
         .sidebar-brand i { color: var(--warning); font-size: 24px; margin-right: 10px; }
@@ -39,7 +38,6 @@
         .nav-item:hover { background: rgba(255,255,255,0.1); color: #fff; }
         .nav-item.active { background: var(--primary-blue); color: #fff; box-shadow: 0 4px 10px rgba(78, 115, 223, 0.3); }
 
-        /* --- Main Content Area --- */
         .main-content { margin-left: 260px; flex: 1; display: flex; flex-direction: column; width: calc(100% - 260px); }
 
         .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; z-index: 10; border-bottom: 1px solid var(--border-color);}
@@ -49,12 +47,10 @@
         .admin-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; color: var(--text-dark); background: rgba(78, 115, 223, 0.1); padding: 6px 15px; border-radius: 20px; border: 1px solid rgba(78, 115, 223, 0.2);}
         .admin-profile i { font-size: 20px; color: var(--primary-blue); }
 
-        /* --- Dashboard Body --- */
         .dashboard-body { padding: 30px; overflow-y: auto; flex: 1; }
         .page-title { font-size: 24px; font-weight: 700; color: var(--text-dark); margin-top: 0; margin-bottom: 5px; display: flex; align-items: center; gap: 10px; }
         .page-subtitle { color: var(--text-main); font-size: 14px; margin-bottom: 25px; }
 
-        /* Pending Cards Grid */
         .pending-list { display: flex; flex-direction: column; gap: 20px; }
         
         .req-card { 
@@ -74,14 +70,12 @@
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Card Header */
         .req-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px dashed var(--border-color); padding-bottom: 15px;}
         .req-title-box { display: flex; flex-direction: column; gap: 5px;}
         .req-title { font-size: 18px; font-weight: 700; color: var(--text-dark); margin: 0; line-height: 1.3; }
         
         .badge { padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(246, 194, 62, 0.1); color: #d9a323; border: 1px solid rgba(246, 194, 62, 0.3); display: flex; align-items: center; gap: 6px; height: fit-content;}
 
-        /* 🌟 NEW: Campaign Description Box 🌟 */
         .req-desc-box {
             background: #f9fafe;
             border-left: 3px solid var(--primary-blue);
@@ -103,7 +97,6 @@
             gap: 5px;
         }
 
-        /* Card Info Grid */
         .req-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
         
         .info-item { display: flex; align-items: center; gap: 12px; background: var(--bg-body); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color);}
@@ -112,7 +105,6 @@
         .info-label { font-size: 11px; color: var(--text-light); text-transform: uppercase; font-weight: 600; margin-bottom: 2px;}
         .info-value { font-size: 14px; color: var(--text-dark); font-weight: 600; }
 
-        /* User ID Box */
         .user-id-box { 
             font-family: monospace; 
             font-size: 13px; 
@@ -124,8 +116,6 @@
             display: flex; 
             flex-direction: column; 
             gap: 5px;
-            word-wrap: break-word; 
-            overflow-wrap: break-word; 
             word-break: break-all;
         }
         
@@ -140,9 +130,7 @@
         
         .user-id-box span { color: var(--primary-blue); font-weight: 600; }
 
-        /* Action Buttons */
         .req-actions { display: flex; gap: 15px; align-items: center; margin-top: 5px;}
-        
         .btn { flex: 1; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 8px; border: none; font-family: 'Poppins', sans-serif;}
         
         .btn-view { background: var(--bg-body); color: var(--primary-blue); border: 1px solid var(--border-color); }
@@ -157,17 +145,15 @@
         .empty-state { text-align: center; padding: 60px 20px; color: var(--text-main); background: var(--bg-white); border-radius: 15px; border: 1px dashed var(--border-color);}
         .empty-state i { font-size: 60px; color: var(--success); margin-bottom: 20px; opacity: 0.8;}
 
-        /* Mobile Overlay */
-        .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
 
         @media (max-width: 768px) {
             .sidebar { left: -260px; }
             .sidebar.active { left: 0; }
             .main-content { margin-left: 0; width: 100%; }
             .menu-toggle { display: block; }
-            .overlay.active { display: block; }
+            .sidebar-overlay.active { display: block; }
             .dashboard-body { padding: 20px 15px; }
-            
             .req-header { flex-direction: column; gap: 15px; }
             .badge { align-self: flex-start; }
             .req-actions { flex-direction: column; }
@@ -177,7 +163,7 @@
 </head>
 <body>
 
-    <div class="overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
+    <div class="sidebar-overlay" id="mobile-overlay" onclick="toggleSidebar()"></div>
 
     <div class="sidebar" id="sidebar">
         <div class="sidebar-brand"><i class="fas fa-user-shield"></i> Admin Panel</div>
@@ -192,6 +178,7 @@
             <div class="nav-item" onclick="window.location.href='admin_users.html'"><i class="fas fa-users main-icon"></i> <span>Manage Users</span></div>
             
             <div class="menu-label">FINANCE & SETTINGS</div>
+            <div class="nav-item" onclick="window.location.href='admin_withdrawals.html'"><i class="fas fa-wallet main-icon"></i> <span>Withdraw Requests</span></div>
             <div class="nav-item" onclick="window.location.href='admin_coins.html'"><i class="fas fa-hand-holding-usd main-icon"></i> <span>Add/Deduct Coins</span></div>
             <div class="nav-item" onclick="window.location.href='admin_settings.html'"><i class="fas fa-cogs main-icon"></i> <span>App Settings</span></div>
             
@@ -249,7 +236,6 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // 🌟 ADMIN SECURE AUTH CHECK 🌟
         auth.onAuthStateChanged(user => {
             if (user && localStorage.getItem('stz_admin_login') === 'true') {
                 loadPendingRequests();
@@ -265,7 +251,6 @@
             });
         }
 
-        // --- Load Pending Campaigns ---
         function loadPendingRequests() {
             db.ref('campaigns').orderByChild('status').equalTo('pending').on('value', snapshot => {
                 const container = document.getElementById('pending-list');
@@ -284,10 +269,9 @@
 
                 let campaignsArr = [];
                 snapshot.forEach(child => { campaignsArr.push({ id: child.key, ...child.val() }); });
-                campaignsArr.reverse(); // Show newest first
+                campaignsArr.reverse();
 
                 campaignsArr.forEach(camp => {
-                    
                     let iconColor = "var(--primary-blue)";
                     let iconClass = "fa-globe";
                     
@@ -299,7 +283,6 @@
 
                     const totalCost = camp.totalViews * (camp.costPerView || camp.duration);
 
-                    // Check if campaign has a description
                     let descHtml = '';
                     if(camp.description && camp.description.trim() !== '') {
                         descHtml = `
@@ -312,7 +295,6 @@
 
                     const cardHtml = `
                         <div class="req-card" id="card-${camp.id}">
-                            
                             <div class="req-header">
                                 <div class="req-title-box">
                                     <h4 class="req-title">${camp.title}</h4>
@@ -321,7 +303,8 @@
                                 <div class="badge"><i class="fas fa-circle" style="font-size: 8px;"></i> Pending Review</div>
                             </div>
 
-                            ${descHtml} <div class="req-info-grid">
+                            ${descHtml}
+                            <div class="req-info-grid">
                                 <div class="info-item">
                                     <div class="info-icon" style="color: ${iconColor};"><i class="${camp.category === 'YouTube' || camp.category === 'Facebook' || camp.category === 'App Download' ? 'fab' : 'fas'} ${iconClass}"></i></div>
                                     <div class="info-text">
@@ -355,7 +338,6 @@
                                 <button class="btn btn-reject" onclick="rejectCampaign('${camp.id}', '${camp.uid}', ${totalCost})"><i class="fas fa-times"></i> Reject & Refund</button>
                                 <button class="btn btn-approve" onclick="approveCampaign('${camp.id}')"><i class="fas fa-check-circle"></i> Approve Ad</button>
                             </div>
-
                         </div>
                     `;
                     container.innerHTML += cardHtml;
@@ -363,21 +345,16 @@
             });
         }
 
-        // --- Approve Campaign ---
         function approveCampaign(campId) {
             if(confirm("Approve this campaign? It will be visible to users immediately.")) {
                 db.ref('campaigns/' + campId).update({
                     status: 'active'
-                }).then(() => {
-                    // Success silently updates real-time UI
                 }).catch(err => alert("Error: " + err.message));
             }
         }
 
-        // --- Reject Campaign & Refund Coins ---
         function rejectCampaign(campId, userUid, refundAmount) {
             const reason = prompt("Enter the reason for rejection (This will be shown to the user):");
-            
             if (reason === null) return; 
             if (reason.trim() === "") {
                 alert("You must provide a reason for rejection!");
@@ -385,17 +362,18 @@
             }
 
             if(confirm(`Are you sure you want to reject?\n\n${refundAmount} coins will be refunded to the publisher's account.`)) {
-                
-                db.ref('campaigns/' + campId).update({
-                    status: 'rejected',
-                    rejectReason: reason
-                }).then(() => {
-                    
-                    db.ref('users/' + userUid + '/coins').transaction((currentCoins) => {
-                        return (currentCoins || 0) + refundAmount;
-                    });
-
-                }).catch(err => alert("Error: " + err.message));
+                db.ref('users/' + userUid + '/coins').transaction((currentCoins) => {
+                    return (currentCoins || 0) + refundAmount;
+                }, (err, committed) => {
+                    if (committed) {
+                        db.ref('campaigns/' + campId).update({
+                            status: 'rejected',
+                            rejectReason: reason
+                        });
+                    } else {
+                        alert("Failed to refund coins. Error: " + err);
+                    }
+                });
             }
         }
     </script>

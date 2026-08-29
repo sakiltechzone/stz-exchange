@@ -40,8 +40,11 @@
         .top-header { height: 70px; background: var(--bg-white); box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; padding: 0 25px; }
         .header-left { display: flex; align-items: center; gap: 15px; }
         .menu-toggle { display: none; font-size: 20px; color: var(--text-main); cursor: pointer; }
-        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #f6c23e; padding: 8px 15px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 14px; border: 1px solid rgba(246, 194, 62, 0.5); }
         
+        .header-balance-wrap { display: flex; align-items: center; gap: 10px; }
+        .coin-balance { background: rgba(246, 194, 62, 0.1); color: #b78a02; padding: 8px 15px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 14px; border: 1px solid rgba(246, 194, 62, 0.5); }
+        .usd-pill { background: rgba(28, 200, 138, 0.1); color: #1cc88a; padding: 8px 15px; border-radius: 20px; font-weight: 700; font-size: 14px; border: 1px solid rgba(28, 200, 138, 0.4); display: flex; align-items: center; gap: 5px; }
+
         /* Form Specific Styles */
         .dashboard-body { padding: 30px; overflow-y: auto; flex: 1; }
         .form-container { max-width: 600px; margin: 0 auto; width: 100%; }
@@ -61,7 +64,6 @@
         .input-wrapper { display: flex; align-items: center; background: var(--bg-body); border: 1.5px solid var(--border-color); border-radius: 8px; overflow: hidden; transition: 0.3s; }
         .input-wrapper:focus-within { border-color: var(--primary-blue); background: var(--bg-white); box-shadow: 0 0 0 3px rgba(78, 115, 223, 0.1); }
         
-        /* Note: Using red color for YouTube icon here */
         .input-icon { padding: 0 15px; color: var(--text-light); font-size: 16px; width: 20px; display: flex; justify-content: center;}
         .input-wrapper:focus-within .input-icon { color: #ff0000; } 
         
@@ -104,6 +106,9 @@
             <div class="nav-item" onclick="window.location.href='offerwall.html'"><i class="fas fa-tasks main-icon"></i> <span>Offerwalls</span></div>
             <div class="nav-item" onclick="window.location.href='refer.html'"><i class="fas fa-users-cog main-icon"></i> <span>Refer & Earn</span></div>
 
+            <div class="menu-label">FINANCE</div>
+            <div class="nav-item" onclick="window.location.href='withdraw.html'"><i class="fas fa-wallet main-icon"></i> <span>Withdraw Funds</span></div>
+
             <div class="menu-label">CAMPAIGNS</div>
             <div class="nav-item active" onclick="window.location.href='campaign.html'"><i class="fas fa-plus-circle main-icon"></i> <span>Add Campaign</span></div>
             <div class="nav-item" onclick="window.location.href='my_campaigns.html'"><i class="fas fa-list-alt main-icon"></i> <span>My Campaigns</span></div>
@@ -123,7 +128,10 @@
             <div class="header-left">
                 <div class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             </div>
-            <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">...</span> Coins</div>
+            <div class="header-balance-wrap">
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">0</span> Coins</div>
+                <div class="usd-pill"><i class="fas fa-dollar-sign"></i> <span id="bal-usd">0.00</span></div>
+            </div>
         </div>
 
         <div class="dashboard-body">
@@ -195,7 +203,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-        <script>
+    <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('mobile-overlay').classList.toggle('active');
@@ -214,14 +222,15 @@
         const db = firebase.database();
 
         let userCoins = 0;
-        const JOB_CATEGORY = "YouTube"; // Specific category for YouTube
+        const JOB_CATEGORY = "YouTube";
 
-        // 🌟 FIXED AUTH CHECK (Secured Session) 🌟
+        // 🌟 AUTH CHECK & REALTIME COIN-TO-USD 🌟
         auth.onAuthStateChanged(user => {
             if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
                 db.ref('users/' + user.uid + '/coins').on('value', s => {
                     userCoins = s.val() || 0;
-                    document.getElementById('bal').innerText = userCoins;
+                    document.getElementById('bal').innerText = userCoins.toLocaleString();
+                    document.getElementById('bal-usd').innerText = (userCoins / 1000).toFixed(2);
                 });
             } else { 
                 window.location.href="index.html"; 
@@ -244,7 +253,6 @@
             if(!title || !url || !views) { alert("Please fill all fields!"); return; }
             if(views < 10) { alert("Minimum views required is 10!"); return; }
             
-            // Validating YouTube link specifically
             if(!url.includes("youtube.com") && !url.includes("youtu.be")) { 
                 alert("Error: Please enter a valid YouTube Video URL!"); 
                 return; 
@@ -280,3 +288,5 @@
             });
         }
     </script>
+</body>
+</html>
