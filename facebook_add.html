@@ -243,7 +243,8 @@
                 db.ref('users/' + user.uid + '/coins').on('value', s => {
                     userCoins = s.val() || 0;
                     document.getElementById('bal').innerText = userCoins.toLocaleString();
-                    document.getElementById('bal-usd').innerText = (userCoins / 1000).toFixed(2);
+                    document.getElementById('bal-usd').innerText = (userCoins / 50000).toFixed(2);
+
                 });
             } else { 
                 window.location.href="index.html"; 
