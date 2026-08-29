@@ -3,18 +3,21 @@ export default async function handler(req, res) {
     const body = (typeof req.body === 'object' && req.body !== null) ? req.body : {};
     const data = { ...query, ...body };
 
-    // ইউজার আইডি
+    // ইউজার আইডি বের করা
     const subId = data.subId || data.sub_id || data.user_id || data.userId || data.uid;
 
-    // 🌟 রিওয়ার্ড/কয়েনকে অগ্রাধিকার দেওয়া (Payout এর ডলার ভ্যালু নয়) 🌟
-    let rawReward = data.reward || data.amount || data.coins;
-    
-    // যদি reward না পেয়ে শুধু payout পায় এবং সেটা ১ এর কম হয়, তবে তাকে কয়েনে কনভার্ট করা
-    if (!rawReward && data.payout) {
-        rawReward = parseFloat(data.payout) >= 1 ? data.payout : parseFloat(data.payout) * 10000;
+    // কয়েন বা রিওয়ার্ড ক্যালকুলেশন
+    let coinsToAdd = 0;
+    if (data.reward && !isNaN(parseFloat(data.reward))) {
+        coinsToAdd = parseFloat(data.reward);
+    } else if (data.amount && !isNaN(parseFloat(data.amount))) {
+        coinsToAdd = parseFloat(data.amount);
+    } else if (data.coins && !isNaN(parseFloat(data.coins))) {
+        coinsToAdd = parseFloat(data.coins);
+    } else if (data.payout && !isNaN(parseFloat(data.payout))) {
+        const p = parseFloat(data.payout);
+        coinsToAdd = p >= 1 ? p : Math.round(p * 20000);
     }
-
-    const coinsToAdd = parseFloat(rawReward);
 
     if (!subId || isNaN(coinsToAdd) || coinsToAdd <= 0) {
         return res.status(200).send("1");
@@ -26,12 +29,13 @@ export default async function handler(req, res) {
     try {
         // ১. বর্তমান কয়েন রিড করা
         const getRes = await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json?auth=${FIREBASE_SECRET}`);
-        const currentCoins = (await getRes.json()) || 0;
+        const currentCoinsData = await getRes.json();
+        const currentCoins = Number(currentCoinsData) || 0;
 
-        // ২. সঠিক কয়েন যোগ করা
-        const updatedCoins = Math.round(Number(currentCoins) + coinsToAdd);
+        // ২. নতুন কয়েন যোগ করা
+        const updatedCoins = Math.round(currentCoins + coinsToAdd);
 
-        // ৩. ফায়ারবেসে ব্যালেন্স সেভ করা
+        // ৩. ফায়ারবেসে সরাসরি আপডেট পাঠানো
         await fetch(`${FIREBASE_DB_URL}/users/${subId}/coins.json?auth=${FIREBASE_SECRET}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
