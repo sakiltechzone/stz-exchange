@@ -258,7 +258,7 @@
                 // Realtime Coins & USD listener
                 db.ref('users/' + user.uid + '/coins').on('value', (snapshot) => {
                     const userCoins = snapshot.val() || 0;
-                    const userUsd = (userCoins / 1000).toFixed(2);
+                    const userUsd = (userCoins / 50000).toFixed(2);
 
                     document.getElementById('display-coins').innerText = userCoins.toLocaleString();
                     
