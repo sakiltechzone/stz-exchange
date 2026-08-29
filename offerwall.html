@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Offerwall & Surveys | STZ Exchange</title>
+    <title>Offerwalls | STZ Exchange</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
             --primary-blue: #4e73df; 
@@ -17,6 +18,7 @@
             --text-light: #b7b9cc; 
             --border-color: #eaecf4; 
             --shadow-sm: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15); 
+            --success-green: #1cc88a;
         }
         body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background-color: var(--bg-body); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
         
@@ -52,55 +54,59 @@
         
         .header-balance-wrap { display: flex; align-items: center; gap: 10px; }
         .coin-balance { background: rgba(246, 194, 62, 0.1); color: #b78a02; padding: 8px 15px; border-radius: 20px; font-weight: 700; display: flex; align-items: center; gap: 8px; font-size: 14px; border: 1px solid rgba(246, 194, 62, 0.5); }
-        .usd-pill { background: rgba(28, 200, 138, 0.1); color: #1cc88a; padding: 8px 15px; border-radius: 20px; font-weight: 700; font-size: 14px; border: 1px solid rgba(28, 200, 138, 0.4); display: flex; align-items: center; gap: 5px; }
-        
+        .usd-pill { background: rgba(28, 200, 138, 0.1); color: var(--success-green); padding: 8px 15px; border-radius: 20px; font-weight: 700; font-size: 14px; border: 1px solid rgba(28, 200, 138, 0.4); }
+
         /* Offerwall Body */
-        .dashboard-body { padding: 25px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; }
-        .page-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .dashboard-body { padding: 25px; overflow-y: auto; flex: 1; }
+        .page-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
         .page-title { font-size: 22px; font-weight: 700; color: var(--text-dark); margin: 0; }
-        
-        /* Offerwall Container */
-        .offerwall-card {
-            background: var(--bg-white);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            box-shadow: var(--shadow-sm);
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            min-height: 600px;
-        }
-        .offerwall-notice {
-            padding: 12px 20px;
-            background: rgba(78, 115, 223, 0.08);
-            border-bottom: 1px solid var(--border-color);
+        .page-subtitle { font-size: 13px; color: var(--text-light); margin-top: 4px; }
+
+        .btn-external {
+            background: var(--primary-blue);
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
             font-size: 13px;
-            color: var(--primary-blue);
+            font-weight: 600;
+            cursor: pointer;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+            transition: 0.2s;
         }
-        .offerwall-frame-wrap {
-            flex: 1;
-            width: 100%;
-            height: 100%;
+        .btn-external:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+        .offerwall-container {
+            background: var(--bg-white);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
             position: relative;
+            min-height: 800px;
         }
-        .offerwall-frame {
+
+        .loading-wrap {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            min-height: 600px;
-            border: none;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
         }
-        .loading-box {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: var(--text-light);
-            font-size: 14px;
+
+        #offerwall-frame {
+            width: 100%;
+            height: 800px;
+            border: none;
+            display: block;
         }
 
         .overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; }
@@ -112,6 +118,7 @@
             .menu-toggle { display: block; }
             .overlay.active { display: block; }
             .dashboard-body { padding: 15px; }
+            #offerwall-frame { height: 700px; }
         }
     </style>
 </head>
@@ -131,7 +138,7 @@
             <div class="nav-item" onclick="window.location.href='dashboard.html'"><i class="fas fa-home main-icon"></i> <span>Dashboard</span></div>
 
             <div class="menu-label">EARNING</div>
-            <div class="nav-item active" onclick="window.location.href='offerwall.html'"><i class="fas fa-tasks main-icon"></i> <span>Offer Walls</span></div>
+            <div class="nav-item active" onclick="window.location.href='offerwall.html'"><i class="fas fa-tasks main-icon"></i> <span>Offerwalls</span></div>
             <div class="nav-item" onclick="window.location.href='surf.html'"><i class="fas fa-mouse-pointer main-icon"></i> <span>Surf & Earn</span></div>
             <div class="nav-item" onclick="window.location.href='refer.html'"><i class="fas fa-users-cog main-icon"></i> <span>Refer & Earn</span></div>
 
@@ -144,10 +151,6 @@
             
             <div class="menu-label">ACCOUNT</div>
             <div class="nav-item" onclick="window.location.href='profile.html'"><i class="fas fa-user main-icon"></i> <span>My Profile</span></div>
-            
-            <div class="menu-label">HELP</div>
-            <div class="nav-item" onclick="window.location.href='support.html'"><i class="fas fa-headset main-icon"></i> <span>Contact Support</span></div>
-            
             <div class="nav-item" onclick="logoutUser()" style="color: #e74a3b;"><i class="fas fa-sign-out-alt main-icon" style="color: #e74a3b;"></i> <span>Logout</span></div>
         </div>
     </div>
@@ -159,29 +162,28 @@
                 <div class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
             </div>
             <div class="header-balance-wrap">
-                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="bal">0</span> Coins</div>
-                <div class="usd-pill"><i class="fas fa-dollar-sign"></i> <span id="bal-usd">0.00</span></div>
+                <div class="coin-balance"><i class="fas fa-coins"></i> <span id="header-coins">0</span> Coins</div>
+                <div class="usd-pill"><i class="fas fa-dollar-sign"></i> <span id="header-usd">0.00</span></div>
             </div>
         </div>
 
         <div class="dashboard-body">
             <div class="page-header-flex">
-                <h2 class="page-title"><i class="fas fa-gift" style="color: var(--primary-blue);"></i> Complete Offers & Earn Coins</h2>
+                <div>
+                    <h2 class="page-title"><i class="fas fa-gift" style="color: var(--primary-blue);"></i> Complete Offers & Earn Coins</h2>
+                    <div class="page-subtitle">Complete surveys, tasks, and apps below to receive instant rewards.</div>
+                </div>
+                <button class="btn-external" onclick="openOfferwallExternal()">
+                    <i class="fas fa-external-link-alt"></i> Open Full Screen
+                </button>
             </div>
 
-            <div class="offerwall-card">
-                <div class="offerwall-notice">
-                    <i class="fas fa-info-circle"></i>
-                    <span>Complete surveys and tasks below. Coins will be credited to your account automatically upon verification!</span>
+            <div class="offerwall-container">
+                <div class="loading-wrap" id="offerwall-loader">
+                    <i class="fas fa-spinner fa-spin fa-2x" style="color: var(--primary-blue); margin-bottom: 12px;"></i>
+                    <p style="margin: 0; font-size: 14px; font-weight: 500;">Loading secure offerwall...</p>
                 </div>
-                
-                <div class="offerwall-frame-wrap">
-                    <div class="loading-box" id="frame-loader">
-                        <i class="fas fa-spinner fa-spin" style="font-size: 30px; margin-bottom: 10px; color: var(--primary-blue);"></i>
-                        <div>Loading Offerwall...</div>
-                    </div>
-                    <iframe id="offerwall-frame" class="offerwall-frame" style="display: none;" onload="onFrameLoaded()"></iframe>
-                </div>
+                <iframe id="offerwall-frame" scrolling="yes" frameborder="0" src=""></iframe>
             </div>
         </div>
     </div>
@@ -210,31 +212,36 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // 🌟 AUTH CHECK & LOAD OFFERWALL 🌟
+        const APP_ID = "us9yiztefqoxgocfy5e5lsx5vpfjt6";
+        let dynamicOfferwallUrl = "";
+
+        // 🌟 AUTH CHECK & OFFERWALL URL GENERATION 🌟
         auth.onAuthStateChanged(user => {
             if (user && user.emailVerified && localStorage.getItem('stz_user_login') === 'true') {
-                // Realtime Coins & USD Listener
+                // Realtime Coin Listener
                 db.ref('users/' + user.uid + '/coins').on('value', s => {
-                    const userCoins = s.val() || 0;
-                    document.getElementById('bal').innerText = userCoins.toLocaleString();
-                    document.getElementById('bal-usd').innerText = (userCoins / 1000).toFixed(2);
+                    const coins = s.val() || 0;
+                    document.getElementById('header-coins').innerText = coins.toLocaleString();
+                    document.getElementById('header-usd').innerText = (coins / 1000).toFixed(2);
                 });
 
-                // Load OfferwallMedia Iframe with User ID
-                loadOfferwall(user.uid);
+                // Set dynamic UID in OfferwallMedia URL
+                dynamicOfferwallUrl = `https://offerwallmedia.com/offerwall/${APP_ID}/${user.uid}`;
+                const frame = document.getElementById('offerwall-frame');
+                frame.src = dynamicOfferwallUrl;
+
+                frame.onload = function() {
+                    document.getElementById('offerwall-loader').style.display = 'none';
+                };
             } else { 
                 window.location.href = "index.html"; 
             }
         });
 
-        function loadOfferwall(uid) {
-            const iframe = document.getElementById('offerwall-frame');
-            iframe.src = "https://offerwallmedia.com/offerwall/?user_id=" + uid;
-        }
-
-        function onFrameLoaded() {
-            document.getElementById('frame-loader').style.display = 'none';
-            document.getElementById('offerwall-frame').style.display = 'block';
+        function openOfferwallExternal() {
+            if (dynamicOfferwallUrl) {
+                window.open(dynamicOfferwallUrl, '_blank');
+            }
         }
 
         function logoutUser() {
